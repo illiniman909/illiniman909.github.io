@@ -324,12 +324,12 @@
       </div>
 
       <div class="field">
-        <label>Brand <span class="req">*</span></label>
+        <label>Binder Type <span class="req">*</span></label>
         <div class="segmented">
-          <input type="radio" id="brand_vaultx" name="binder_brand" value="Vault X" required />
-          <label for="brand_vaultx">Vault X</label>
-          <input type="radio" id="brand_morabto" name="binder_brand" value="Morabto" />
-          <label for="brand_morabto">Morabto</label>
+          <input type="radio" id="type_toploader" name="binder_type" value="Toploader (Morabto Binder)" data-brand="Morabto" required />
+          <label for="type_toploader">Toploader (Morabto)</label>
+          <input type="radio" id="type_no_toploader" name="binder_type" value="Non-Toploader (Vault X Binder)" data-brand="Vault X" />
+          <label for="type_no_toploader">Non-Toploader (Vault&nbsp;X)</label>
         </div>
       </div>
 
@@ -337,26 +337,20 @@
         <label>Binder Size <span class="req">*</span></label>
         <div class="segmented">
           <input type="radio" id="size_4" name="binder_size" value="4 cards per page" required />
-          <label for="size_4">4 per page</label>
+          <label for="size_4">4 cards per page</label>
           <input type="radio" id="size_9" name="binder_size" value="9 cards per page" />
-          <label for="size_9">9 per page</label>
+          <label for="size_9">9 cards per page</label>
         </div>
       </div>
 
-      <div class="field">
-        <label>Binder Type <span class="req">*</span></label>
-        <div class="segmented">
-          <input type="radio" id="type_toploader" name="binder_type" value="Toploader binder" required />
-          <label for="type_toploader">Toploader</label>
-          <input type="radio" id="type_no_toploader" name="binder_type" value="No toploader" />
-          <label for="type_no_toploader">No Toploader</label>
-        </div>
-      </div>
+      <!-- Brand is implied by the binder type (Toploader = Morabto,
+           Non-Toploader = Vault X) and stored here for the email. -->
+      <input type="hidden" name="binder_brand" id="binder_brand" />
 
       <div class="field">
         <label>Binder Color <span class="req">*</span></label>
         <div class="swatches" id="swatches">
-          <p class="swatch-hint">Pick a brand and size above to see available colors.</p>
+          <p class="swatch-hint">Pick a binder type and size above to see available colors.</p>
         </div>
         <input type="hidden" name="binder_color" id="binder_color" />
       </div>
@@ -417,18 +411,23 @@
 
     const swatches = document.getElementById('swatches');
     const colorInput = document.getElementById('binder_color');
+    const brandInput = document.getElementById('binder_brand');
 
     function renderSwatches() {
-      const brand = form.querySelector('input[name="binder_brand"]:checked');
+      // Brand is derived from the chosen binder type (Toploader = Morabto,
+      // Non-Toploader = Vault X) via the radio's data-brand attribute.
+      const typeEl = form.querySelector('input[name="binder_type"]:checked');
       const size = form.querySelector('input[name="binder_size"]:checked');
+      const brand = typeEl ? typeEl.dataset.brand : '';
+      brandInput.value = brand;
       colorInput.value = '';
 
       if (!brand || !size) {
-        swatches.innerHTML = '<p class="swatch-hint">Pick a brand and size above to see available colors.</p>';
+        swatches.innerHTML = '<p class="swatch-hint">Pick a binder type and size above to see available colors.</p>';
         return;
       }
 
-      const colors = (BINDER_COLORS[brand.value] && BINDER_COLORS[brand.value][size.value]) || [];
+      const colors = (BINDER_COLORS[brand] && BINDER_COLORS[brand][size.value]) || [];
       if (!colors.length) {
         swatches.innerHTML = '<p class="swatch-hint">No colors are listed for this option yet — please use Additional Notes.</p>';
         return;
@@ -449,7 +448,7 @@
       });
     }
 
-    form.querySelectorAll('input[name="binder_brand"], input[name="binder_size"]').forEach(function (el) {
+    form.querySelectorAll('input[name="binder_type"], input[name="binder_size"]').forEach(function (el) {
       el.addEventListener('change', renderSwatches);
     });
 
