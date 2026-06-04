@@ -64,7 +64,7 @@ export default {
         address: form.get('address') || '',
         binder_color: form.get('binder_color') || '',
         binder_type: form.get('binder_type') || '',
-        cards_per_page: form.get('cards_per_page') || '',
+        binder_size: form.get('binder_size') || '',
         notes: form.get('notes') || '',
         front_image_url: frontUrl,
         back_image_url: backUrl || 'None provided',
