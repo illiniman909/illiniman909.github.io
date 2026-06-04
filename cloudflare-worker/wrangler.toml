@@ -1,0 +1,11 @@
+name = "krusty-binder"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# Site allowed to call this Worker. Override here if your domain differs.
+[vars]
+ALLOWED_ORIGIN = "https://krustykardboard.com"
+
+# Secrets are NOT stored here. Set them with:
+#   wrangler secret put IMGBB_API_KEY
+#   wrangler secret put WEB3FORMS_ACCESS_KEY
