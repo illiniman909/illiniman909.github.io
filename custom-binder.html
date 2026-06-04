@@ -186,6 +186,46 @@
       box-shadow: 0 3px 0 rgba(0,0,0,0.18);
     }
 
+    /* color swatch picker */
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .swatch-hint {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #8a6a3a;
+    }
+    .swatch {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 2px solid #d8c4a4;
+      border-radius: 10px;
+      background: #fffdf8;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 0.85rem;
+      color: #3a2206;
+      transition: all 0.15s ease;
+    }
+    .swatch:hover { border-color: #c97f1a; }
+    .swatch.selected {
+      border-color: #c97f1a;
+      background: #fff4e2;
+      box-shadow: 0 0 0 3px rgba(201,127,26,0.2);
+    }
+    .swatch .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.25);
+      flex-shrink: 0;
+    }
+
     .submit-btn {
       width: 100%;
       padding: 16px;
@@ -284,20 +324,23 @@
       </div>
 
       <div class="field">
-        <label for="binder_color">Binder Color <span class="req">*</span></label>
-        <select id="binder_color" name="binder_color" required>
-          <option value="" disabled selected>Choose a color&hellip;</option>
-          <option>Black</option>
-          <option>White</option>
-          <option>Red</option>
-          <option>Blue</option>
-          <option>Green</option>
-          <option>Purple</option>
-          <option>Pink</option>
-          <option>Yellow</option>
-          <option>Orange</option>
-          <option>Other (note below)</option>
-        </select>
+        <label>Brand <span class="req">*</span></label>
+        <div class="segmented">
+          <input type="radio" id="brand_vaultx" name="binder_brand" value="Vault X" required />
+          <label for="brand_vaultx">Vault X</label>
+          <input type="radio" id="brand_morabto" name="binder_brand" value="Morabto" />
+          <label for="brand_morabto">Morabto</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Binder Size <span class="req">*</span></label>
+        <div class="segmented">
+          <input type="radio" id="size_4" name="binder_size" value="4 cards per page" required />
+          <label for="size_4">4 per page</label>
+          <input type="radio" id="size_9" name="binder_size" value="9 cards per page" />
+          <label for="size_9">9 per page</label>
+        </div>
       </div>
 
       <div class="field">
@@ -311,13 +354,11 @@
       </div>
 
       <div class="field">
-        <label>Binder Size <span class="req">*</span></label>
-        <div class="segmented">
-          <input type="radio" id="size_4" name="binder_size" value="4 cards per page" required />
-          <label for="size_4">4 per page</label>
-          <input type="radio" id="size_9" name="binder_size" value="9 cards per page" />
-          <label for="size_9">9 per page</label>
+        <label>Binder Color <span class="req">*</span></label>
+        <div class="swatches" id="swatches">
+          <p class="swatch-hint">Pick a brand and size above to see available colors.</p>
         </div>
+        <input type="hidden" name="binder_color" id="binder_color" />
       </div>
 
       <div class="field">
@@ -342,6 +383,70 @@
     const result = document.getElementById('result');
     const submitBtn = document.getElementById('submitBtn');
 
+    /* ===================================================================
+       AVAILABLE BINDER COLORS  —  EDIT ME
+       Lists the colors offered for each Brand + Size. These are STARTER
+       values — please confirm/correct them against the Amazon listings.
+       To add a color, just add its name to the array; if its swatch dot
+       needs a specific shade, add the name + hex to COLOR_HEX below.
+       =================================================================== */
+    const BINDER_COLORS = {
+      'Vault X': {
+        '4 cards per page': ['Black', 'Blue', 'Red', 'Green', 'Purple', 'Pink', 'Grey', 'White', 'Teal'],
+        '9 cards per page': ['Black', 'Blue', 'Red', 'Green', 'Purple', 'Pink', 'Grey', 'White', 'Teal', 'Orange', 'Yellow']
+      },
+      'Morabto': {
+        '4 cards per page': ['Black', 'Blue', 'Red', 'Green', 'Purple', 'Pink', 'White'],
+        '9 cards per page': ['Black', 'Blue', 'Red', 'Green', 'Purple', 'Pink', 'White']
+      }
+    };
+
+    // Swatch dot colors. Any color name not listed falls back to grey.
+    const COLOR_HEX = {
+      'Black': '#1c1c1c', 'White': '#f4f3ee', 'Grey': '#8b8b8b', 'Gray': '#8b8b8b',
+      'Red': '#c0392b', 'Blue': '#2257c0', 'Navy': '#1b2a52', 'Green': '#2e8b4f',
+      'Purple': '#7d3cc0', 'Pink': '#e87aa8', 'Orange': '#e8852b', 'Yellow': '#f2c829',
+      'Teal': '#1aa39a', 'Aqua': '#3fc6c6', 'Brown': '#7a4a25', 'Gold': '#caa334'
+    };
+
+    const swatches = document.getElementById('swatches');
+    const colorInput = document.getElementById('binder_color');
+
+    function renderSwatches() {
+      const brand = form.querySelector('input[name="binder_brand"]:checked');
+      const size = form.querySelector('input[name="binder_size"]:checked');
+      colorInput.value = '';
+
+      if (!brand || !size) {
+        swatches.innerHTML = '<p class="swatch-hint">Pick a brand and size above to see available colors.</p>';
+        return;
+      }
+
+      const colors = (BINDER_COLORS[brand.value] && BINDER_COLORS[brand.value][size.value]) || [];
+      if (!colors.length) {
+        swatches.innerHTML = '<p class="swatch-hint">No colors are listed for this option yet — please use Additional Notes.</p>';
+        return;
+      }
+
+      swatches.innerHTML = '';
+      colors.forEach(function (name) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'swatch';
+        btn.innerHTML = '<span class="dot" style="background:' + (COLOR_HEX[name] || '#cccccc') + '"></span>' + name;
+        btn.addEventListener('click', function () {
+          swatches.querySelectorAll('.swatch').forEach(function (s) { s.classList.remove('selected'); });
+          btn.classList.add('selected');
+          colorInput.value = name;
+        });
+        swatches.appendChild(btn);
+      });
+    }
+
+    form.querySelectorAll('input[name="binder_brand"], input[name="binder_size"]').forEach(function (el) {
+      el.addEventListener('change', renderSwatches);
+    });
+
     function showResult(type, message) {
       result.className = 'result ' + type;
       result.textContent = message;
@@ -350,6 +455,12 @@
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+
+      // The color swatch picker uses a hidden input, so validate it manually.
+      if (!colorInput.value) {
+        showResult('error', 'Please choose a binder color.');
+        return;
+      }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending…';

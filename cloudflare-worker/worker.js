@@ -62,6 +62,7 @@ export default {
         phone: form.get('phone') || '',
         email: form.get('email') || '',
         address: form.get('address') || '',
+        binder_brand: form.get('binder_brand') || '',
         binder_color: form.get('binder_color') || '',
         binder_type: form.get('binder_type') || '',
         binder_size: form.get('binder_size') || '',
