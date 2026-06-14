@@ -109,6 +109,24 @@
       font-size: 0.88rem;
       color: #6b5333;
     }
+    .event-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+      color: #fff;
+      background: linear-gradient(135deg, #c97f1a 0%, #9c5e0d 100%);
+      box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .event-link:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
+    .event-link:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
 
     .empty-card {
       width: 100%;
@@ -165,6 +183,7 @@
          name     — what / where it is
          date     — the date (any text you like, e.g. "Sat, July 12, 2026")
          location — venue / city
+         link     — optional event website (e.g. "https://example.com")
          note     — optional extra line (table number, time, etc.)
        Past events can simply be deleted from this list.
        =================================================================== */
@@ -173,6 +192,7 @@
       //   name: 'Example Card Show',
       //   date: 'Sat, July 12, 2026 • 10am–4pm',
       //   location: 'Anytown Convention Center, IL',
+      //   link: 'https://example.com',
       //   note: 'Find us at Table 14!'
       // },
     ];
@@ -181,6 +201,8 @@
       '<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c97f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
     const ICON_PIN =
       '<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c97f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const ICON_WEB =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
 
     function esc(s) {
       return String(s).replace(/[&<>"']/g, function (c) {
@@ -202,6 +224,7 @@
         if (ev.date)     html += '<div class="event-meta">' + ICON_CAL + esc(ev.date) + '</div>';
         if (ev.location) html += '<div class="event-meta">' + ICON_PIN + esc(ev.location) + '</div>';
         if (ev.note)     html += '<div class="event-note">' + esc(ev.note) + '</div>';
+        if (ev.link)     html += '<a class="event-link" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' + ICON_WEB + 'Event Website</a>';
         card.innerHTML = html;
         wrap.appendChild(card);
       });
