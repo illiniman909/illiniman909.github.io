@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us &bull; Krusty Kardboard TCG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 60px;
+      font-family: 'Nunito', sans-serif;
+      position: relative;
+      overflow-x: hidden;
+
+      background-image: url('cardboard.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: rgba(80, 45, 5, 0.18);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo {
+      width: 70%;
+      max-width: 300px;
+      filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
+      animation: popIn 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) both;
+    }
+
+    .heading {
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.55);
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    .divider {
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #5c3610, #2a1200, #5c3610, transparent);
+      border-radius: 2px;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+
+    .card {
+      width: 100%;
+      background: rgba(255, 250, 242, 0.96);
+      border-radius: 18px;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.18), 0 14px 30px rgba(0,0,0,0.25);
+      animation: fadeUp 0.45s 0.35s ease both;
+    }
+
+    .card p {
+      font-weight: 700;
+      color: #4a3413;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .email-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 22px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #fff;
+      background: linear-gradient(135deg, #c97f1a 0%, #9c5e0d 100%);
+      box-shadow: 0 4px 0 rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      word-break: break-all;
+    }
+    .email-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 0 rgba(0,0,0,0.28), 0 14px 28px rgba(0,0,0,0.22);
+    }
+    .email-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.28);
+    }
+    .email-btn svg { flex-shrink: 0; }
+
+    .back-link {
+      margin-top: 6px;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      color: #fff;
+      text-decoration: none;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      opacity: 0.9;
+      animation: fadeUp 0.4s 0.6s ease both;
+    }
+    .back-link:hover { opacity: 1; text-decoration: underline; }
+
+    @keyframes popIn {
+      from { transform: scale(0.75) rotate(-2deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg);     opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(18px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <img class="logo" src="logo.png" alt="Krusty Kardboard TCG" />
+    <h1 class="heading">Contact Us</h1>
+    <div class="divider"></div>
+
+    <div class="card">
+      <p>Questions, custom orders, or want to know where we’ll be next?<br />Drop us a line — we’d love to hear from you!</p>
+      <a class="email-btn" href="mailto:krustykardboard@gmail.com">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+        krustykardboard@gmail.com
+      </a>
+    </div>
+
+    <a class="back-link" href="index.html">&larr; Back to Home</a>
+
+  </div>
+</body>
+</html>

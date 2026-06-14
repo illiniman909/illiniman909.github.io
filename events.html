@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scheduled Events &bull; Krusty Kardboard TCG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 60px;
+      font-family: 'Nunito', sans-serif;
+      position: relative;
+      overflow-x: hidden;
+
+      background-image: url('cardboard.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: rgba(80, 45, 5, 0.18);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo {
+      width: 70%;
+      max-width: 300px;
+      filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
+      animation: popIn 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) both;
+    }
+
+    .heading {
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.55);
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    .divider {
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #5c3610, #2a1200, #5c3610, transparent);
+      border-radius: 2px;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+
+    .events {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .event-card {
+      background: rgba(255, 250, 242, 0.96);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.16), 0 12px 26px rgba(0,0,0,0.22);
+      border-left: 8px solid #c97f1a;
+      animation: fadeUp 0.45s ease both;
+    }
+    .event-name {
+      font-family: 'Bangers', cursive;
+      font-size: 1.45rem;
+      letter-spacing: 0.8px;
+      color: #7a4a0d;
+      margin-bottom: 6px;
+    }
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 0.92rem;
+      color: #3a2206;
+      margin-bottom: 3px;
+    }
+    .event-meta .ico { flex-shrink: 0; }
+    .event-note {
+      margin-top: 8px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: #6b5333;
+    }
+    .event-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+      color: #fff;
+      background: linear-gradient(135deg, #c97f1a 0%, #9c5e0d 100%);
+      box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .event-link:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
+    .event-link:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
+
+    .empty-card {
+      width: 100%;
+      background: rgba(255, 250, 242, 0.96);
+      border-radius: 16px;
+      padding: 26px 22px;
+      text-align: center;
+      font-weight: 700;
+      color: #6b5333;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.16), 0 12px 26px rgba(0,0,0,0.22);
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .back-link {
+      margin-top: 6px;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      color: #fff;
+      text-decoration: none;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      opacity: 0.9;
+      animation: fadeUp 0.4s 0.6s ease both;
+    }
+    .back-link:hover { opacity: 1; text-decoration: underline; }
+
+    @keyframes popIn {
+      from { transform: scale(0.75) rotate(-2deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg);     opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(18px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <img class="logo" src="logo.png" alt="Krusty Kardboard TCG" />
+    <h1 class="heading">Scheduled Events</h1>
+    <div class="divider"></div>
+
+    <div class="events" id="events"></div>
+
+    <a class="back-link" href="index.html">&larr; Back to Home</a>
+
+  </div>
+
+  <script>
+    /* ===================================================================
+       SCHEDULED EVENTS  —  EDIT ME
+       Add, edit, or remove the events below. Each event has:
+         name     — what / where it is
+         date     — the date (any text you like, e.g. "Sat, July 12, 2026")
+         location — venue / city
+         link     — optional event website (e.g. "https://example.com")
+         note     — optional extra line (table number, time, etc.)
+       Past events can simply be deleted from this list.
+       =================================================================== */
+    const EVENTS = [
+      {
+        name: 'Nexus Con',
+        date: 'June 20, 2026',
+        location: '1 McCamly Square, McCamly St S, Battle Creek, MI 49017',
+        link: 'https://oozingcollectibles.com'
+      },
+      {
+        name: 'Legends Card Show',
+        date: 'July 18, 2026',
+        location: '3661 28th St SE, Grand Rapids, MI 49512',
+        link: 'http://legendssportsandgames.com'
+      },
+      {
+        name: 'Grand Rapids TCG Con',
+        date: 'August 14–16, 2026',
+        location: 'Grand Rapids, MI — Venue TBD',
+        link: 'https://cardsandmoretour.com/event/grand-rapids-tcg-con/'
+      },
+    ];
+
+    const ICON_CAL =
+      '<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c97f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const ICON_PIN =
+      '<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c97f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const ICON_WEB =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    const wrap = document.getElementById('events');
+    if (!EVENTS.length) {
+      wrap.innerHTML =
+        '<div class="empty-card">No events are scheduled right now — check back soon, or ' +
+        '<a href="contact.html">contact us</a> to see where we’ll be next!</div>';
+    } else {
+      EVENTS.forEach(function (ev, i) {
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        card.style.animationDelay = (0.05 * i) + 's';
+        let html = '<div class="event-name">' + esc(ev.name) + '</div>';
+        if (ev.date)     html += '<div class="event-meta">' + ICON_CAL + esc(ev.date) + '</div>';
+        if (ev.location) html += '<div class="event-meta">' + ICON_PIN + esc(ev.location) + '</div>';
+        if (ev.note)     html += '<div class="event-note">' + esc(ev.note) + '</div>';
+        if (ev.link)     html += '<a class="event-link" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' + ICON_WEB + 'Event Website</a>';
+        card.innerHTML = html;
+        wrap.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>
