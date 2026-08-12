@@ -53,11 +53,10 @@ export default {
         backUrl = await uploadToImgbb(backFile, env.IMGBB_API_KEY);
       }
 
-      // 2. Forward the request to Web3Forms with the hosted image URLs.
-      const payload = {
-        access_key: env.WEB3FORMS_ACCESS_KEY,
-        subject: 'New Custom Binder Request',
-        from_name: 'Krusty Kardboard Custom Binders',
+      // Every field of this submission, in one place. Used both for the
+      // email (Web3Forms) and for the Google Sheet log below.
+      const record = {
+        submitted_at: new Date().toISOString(),
         name: form.get('name') || '',
         phone: form.get('phone') || '',
         email: form.get('email') || '',
@@ -71,18 +70,50 @@ export default {
         back_image_url: backUrl || 'None provided',
       };
 
+      // 2. Forward the request to Web3Forms with the hosted image URLs.
+      const payload = {
+        access_key: env.WEB3FORMS_ACCESS_KEY,
+        subject: 'New Custom Binder Request',
+        from_name: 'Krusty Kardboard Custom Binders',
+        ...record,
+      };
+
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
+
+      // 3. Also log every field to a Google Sheet (best-effort). This runs
+      //    after the email and is fully isolated: if the Sheet webhook is
+      //    unset or fails, the customer's request has still been emailed and
+      //    we return success regardless.
+      await logToSheet(record, env.SHEET_WEBHOOK_URL, env.SHEET_SHARED_SECRET);
+
       return json(data, res.status, cors);
     } catch (err) {
       return json({ success: false, message: (err && err.message) || 'Server error.' }, 500, cors);
     }
   },
 };
+
+// Appends the submission as a row to a Google Sheet via an Apps Script
+// Web App. Best-effort: any error is swallowed so it can never break the
+// email flow or the response to the customer. If SHEET_WEBHOOK_URL is not
+// configured, this is a no-op.
+async function logToSheet(record, webhookUrl, sharedSecret) {
+  if (!webhookUrl) return;
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: sharedSecret || '', ...record }),
+    });
+  } catch (_) {
+    // Intentionally ignored — logging is non-critical.
+  }
+}
 
 async function uploadToImgbb(file, key) {
   const fd = new FormData();
