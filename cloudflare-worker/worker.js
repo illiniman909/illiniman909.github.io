@@ -140,6 +140,7 @@ async function sendCustomerConfirmation(p, env) {
     body: JSON.stringify({
       from,
       to: [p.email],
+      reply_to: env.REPLY_TO || 'krustykardboard@gmail.com',
       subject: 'We received your custom binder request — Krusty Kardboard',
       html,
     }),
