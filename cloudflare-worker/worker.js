@@ -83,6 +83,11 @@ export default {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
+      // Identify the form service in its error messages (e.g. rate limits)
+      // so failures are distinguishable from image-host errors.
+      if (!data.success && data.message) {
+        data.message = 'Form service: ' + data.message;
+      }
 
       // 3. On success, email the customer a confirmation with their request
       //    details. Never fails the submission — the shop email above is the
@@ -157,7 +162,7 @@ async function uploadToImgbb(file, key) {
   });
   const data = await res.json();
   if (!data.success) {
-    throw new Error((data.error && data.error.message) || 'Image upload failed.');
+    throw new Error('Image host: ' + ((data.error && data.error.message) || 'upload failed.'));
   }
   return data.data.url;
 }
