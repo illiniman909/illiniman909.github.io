@@ -1,8 +1,16 @@
 # Custom Binder form handler — Cloudflare Worker
 
-This Worker keeps your **ImgBB** and **Web3Forms** keys off the public web page.
-The browser sends the binder form to the Worker; the Worker uploads the images
-and emails you the request, using keys stored as encrypted secrets.
+The browser sends the binder form to this Worker; the Worker emails you the
+order (with the customer's images attached) and sends the customer an
+automatic confirmation — all via **Resend**, using keys stored as encrypted
+secrets.
+
+**Why Resend for everything:** Workers share Cloudflare egress IPs with other
+people's Workers. ImgBB and Web3Forms rate-limit by IP, so submissions could be
+blocked by *other people's* traffic ("Rate limit exceeded. IP temporarily
+blocked"). Resend authenticates by API key, not IP, so it is immune. The old
+ImgBB + Web3Forms flow remains only as an automatic fallback when
+`RESEND_API_KEY` isn't set.
 
 You can deploy it in ~5 minutes with **no command line** (Dashboard) or with the
 `wrangler` CLI.
@@ -19,11 +27,12 @@ You can deploy it in ~5 minutes with **no command line** (Dashboard) or with the
 5. Go to the Worker's **Settings → Variables and Secrets** and add:
    | Name | Type | Value |
    |------|------|-------|
-   | `IMGBB_API_KEY` | Secret (Encrypt) | your ImgBB key |
-   | `WEB3FORMS_ACCESS_KEY` | Secret (Encrypt) | your Web3Forms key |
+   | `RESEND_API_KEY` | Secret (Encrypt) | your Resend key — powers both emails |
    | `ALLOWED_ORIGIN` | Text | `https://krustykardboard.com` |
-   | `RESEND_API_KEY` | Secret (Encrypt) | *(optional)* your Resend key — enables the customer confirmation email |
-   | `FROM_EMAIL` | Text | *(optional)* e.g. `Krusty Kardboard <orders@krustykardboard.com>` |
+   | `FROM_EMAIL` | Text | *(optional)* default `Krusty Kardboard <orders@krustykardboard.com>` |
+   | `SHOP_EMAIL` | Text | *(optional)* where orders go, default `krustykardboard@gmail.com` |
+   | `IMGBB_API_KEY` | Secret (Encrypt) | *(legacy fallback only)* |
+   | `WEB3FORMS_ACCESS_KEY` | Secret (Encrypt) | *(legacy fallback only)* |
 6. **Deploy** once more so the secrets take effect.
 7. Copy the Worker URL shown at the top — it looks like
    `https://krusty-binder.YOUR-SUBDOMAIN.workers.dev`.
