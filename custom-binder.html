@@ -110,14 +110,49 @@
       position: relative;
       width: 300px;
       height: 172px;
-      margin: 12px 0 4px;
+      margin: 34px 0 14px;
       transform-style: preserve-3d;
-      transform: translateX(-75px) rotateX(12deg) rotateY(-13deg);
+      transform: translateX(-68px) rotateX(26deg) rotateY(-17deg);
       transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
       cursor: pointer;
     }
     .binder:hover,
     .binder.open { transform: translateX(0) rotateX(18deg) rotateY(0deg); }
+
+    /* ---- Closed-binder thickness (the 5.5cm zip edge) ---- */
+    .binder-depth {
+      position: absolute; left: 50%; top: 0; width: 150px; height: 100%;
+      transform-style: preserve-3d;
+      pointer-events: none; z-index: 2;
+      opacity: 1; transition: opacity 0.35s ease;
+    }
+    .binder:hover .binder-depth,
+    .binder.open .binder-depth { opacity: 0; }
+    .binder-depth span {
+      position: absolute;
+      background:
+        /* zipper teeth running along the edge */
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.10) 0 2px, transparent 2px 5px),
+        linear-gradient(#242424, #101010);
+    }
+    /* bottom edge face */
+    .depth-bottom {
+      left: 3px; right: 3px; bottom: 0; height: 24px;
+      transform-origin: bottom; transform: rotateX(-90deg);
+    }
+    /* right edge face */
+    .depth-right {
+      top: 2px; bottom: 2px; right: 0; width: 24px;
+      transform-origin: right; transform: rotateY(90deg);
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.10) 0 2px, transparent 2px 5px),
+        linear-gradient(90deg, #242424, #101010);
+    }
+    /* top edge face */
+    .depth-top {
+      left: 3px; right: 3px; top: 0; height: 24px;
+      transform-origin: top; transform: rotateX(90deg);
+    }
 
     /* A page holds the card pockets (dark plastic, like the reference) */
     .page {
@@ -158,12 +193,13 @@
       position: absolute; top: 0; right: 50%; width: 150px; height: 100%;
       transform-origin: right center;
       transform-style: preserve-3d;
-      transform: rotateY(180deg);       /* closed: folded over the right page */
+      /* closed: folded over the right page, raised to the top of the slab */
+      transform: translateZ(24px) rotateY(180deg);
       transition: transform 0.7s cubic-bezier(0.4,0.15,0.2,1);
       z-index: 3;
     }
     .binder:hover .binder-leaf,
-    .binder.open .binder-leaf { transform: rotateY(0deg); }  /* open: flat as left page */
+    .binder.open .binder-leaf { transform: translateZ(0) rotateY(0deg); }  /* open: flat as left page */
 
     .leaf-face {
       position: absolute; inset: 0;
@@ -544,6 +580,11 @@
         <div class="binder" id="binderPreview" role="button" tabindex="0"
              aria-label="Binder preview — hover or tap to open it">
           <div class="page page-right"><div class="pockets" id="binderArt"></div></div>
+          <div class="binder-depth">
+            <span class="depth-bottom"></span>
+            <span class="depth-right"></span>
+            <span class="depth-top"></span>
+          </div>
           <div class="binder-gutter"></div>
           <div class="binder-leaf">
             <div class="leaf-face cover-front"></div>
