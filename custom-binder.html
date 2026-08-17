@@ -4,9 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Custom Binder Request &bull; Krusty Kardboard TCG</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand-orange: #c97f1a;
+      --brand-orange-dk: #9c5e0d;
+      --ink: #2a1a00;
+      --ink-soft: #6b4a18;
+      --paper: #fffdf8;
+      --line: #d8c4a4;
+      --go: #00c244;
+      --go-dk: #009e36;
+    }
+
+    /* Fallback tone behind the texture (shows only if the image fails). */
+    html { background: #6b4a2a; }
 
     body {
       min-height: 100vh;
@@ -18,29 +32,28 @@
       font-family: 'Nunito', sans-serif;
       position: relative;
       overflow-x: hidden;
-
-      background-image: url('cardboard.jpg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
     }
 
-    /* Subtle dark overlay for readability */
+    /* Cardboard texture + readability tint painted on a single FIXED layer.
+       Using a fixed positioned element (instead of background-attachment:
+       fixed) renders reliably on iOS Safari, so the texture stays put and
+       persists behind the whole form as you scroll. */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
+      z-index: -1;
       pointer-events: none;
-      z-index: 0;
-      background: rgba(80, 45, 5, 0.18);
+      background:
+        linear-gradient(rgba(80, 45, 5, 0.18), rgba(80, 45, 5, 0.18)),
+        url('cardboard.jpg') center center / cover no-repeat;
     }
 
     .container {
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -48,20 +61,29 @@
     }
 
     .logo {
-      width: 70%;
-      max-width: 300px;
+      width: 62%;
+      max-width: 280px;
       filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
       animation: popIn 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) both;
     }
 
     .heading {
       font-family: 'Bangers', cursive;
-      font-size: 2rem;
+      font-size: 2.1rem;
       letter-spacing: 1.5px;
       color: #fff;
       text-align: center;
       text-shadow: 0 3px 10px rgba(0,0,0,0.55);
       animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .subheading {
+      margin-top: -8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      animation: fadeUp 0.5s 0.25s ease both;
     }
 
     .divider {
@@ -72,16 +94,125 @@
       animation: fadeUp 0.5s 0.3s ease both;
     }
 
+    /* ============ LIVE BINDER PREVIEW ============ */
+    .preview-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      perspective: 900px;
+      animation: fadeUp 0.5s 0.32s ease both;
+    }
+    .binder {
+      position: relative;
+      width: 200px;
+      height: 256px;
+      border-radius: 8px 14px 14px 8px;
+      background: var(--cover, linear-gradient(135deg, #3a3f47, #23262c));
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.4),
+        inset 0 0 0 2px rgba(255,255,255,0.06);
+      transform: rotateY(-16deg) rotateX(4deg);
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), background 0.35s ease;
+      transform-style: preserve-3d;
+    }
+    .binder:hover { transform: rotateY(-6deg) rotateX(2deg); }
+    /* spine */
+    .binder::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 16px;
+      border-radius: 8px 0 0 8px;
+      background: rgba(0,0,0,0.28);
+      box-shadow: inset -3px 0 6px rgba(0,0,0,0.35);
+    }
+    /* rings hint */
+    .binder::after {
+      content: '';
+      position: absolute;
+      left: 6px; top: 22px; bottom: 22px;
+      width: 4px;
+      border-radius: 4px;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.55) 0 8px,
+        transparent 8px 26px
+      );
+      opacity: 0.5;
+    }
+    .binder-art {
+      position: absolute;
+      left: 26px; right: 12px; top: 14px; bottom: 14px;
+      border-radius: 4px;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(255,255,255,0.10);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25), 0 4px 12px rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .binder-art .placeholder {
+      font-family: 'Bangers', cursive;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.85);
+      text-align: center;
+      line-height: 1.3;
+      padding: 0 10px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .preview-caption {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    /* ============ CARD / FORM ============ */
     .card {
       width: 100%;
-      background: rgba(255, 250, 242, 0.96);
-      border-radius: 18px;
-      padding: 24px 22px;
-      box-shadow: 0 6px 0 rgba(0,0,0,0.18), 0 14px 30px rgba(0,0,0,0.25);
+      background: rgba(255, 250, 242, 0.97);
+      border-radius: 20px;
+      padding: 8px 22px 24px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.10), 0 18px 40px rgba(0,0,0,0.28);
       animation: fadeUp 0.45s 0.35s ease both;
     }
 
+    /* Collapsible sections */
+    .section { border-bottom: 1.5px solid #efe2cd; }
+    .section:last-of-type { border-bottom: none; }
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 2px 14px;
+    }
+    .section-num {
+      flex-shrink: 0;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      font-family: 'Bangers', cursive;
+      font-size: 1.05rem;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dk));
+      box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    }
+    .section-title {
+      font-family: 'Bangers', cursive;
+      font-size: 1.25rem;
+      letter-spacing: 0.8px;
+      color: var(--ink);
+    }
+    .section-body { padding: 2px 2px 20px; }
+
     .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
 
     label {
       display: block;
@@ -100,50 +231,90 @@
     select {
       width: 100%;
       padding: 12px 14px;
-      border: 2px solid #d8c4a4;
+      border: 2px solid var(--line);
       border-radius: 10px;
       font-family: 'Nunito', sans-serif;
       font-size: 1rem;
       font-weight: 700;
-      color: #2a1a00;
-      background: #fffdf8;
+      color: var(--ink);
+      background: var(--paper);
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: #c97f1a;
+      border-color: var(--brand-orange);
       box-shadow: 0 0 0 3px rgba(201,127,26,0.2);
     }
+    input.invalid, textarea.invalid { border-color: #d9534f; box-shadow: 0 0 0 3px rgba(217,83,79,0.18); }
     textarea { resize: vertical; min-height: 70px; }
 
-    input[type="file"] {
-      width: 100%;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #3a2206;
-      padding: 8px 0;
-    }
-    input[type="file"]::file-selector-button {
-      font-family: 'Nunito', sans-serif;
-      font-weight: 900;
-      color: #fff;
-      background: linear-gradient(135deg, #c97f1a 0%, #9c5e0d 100%);
-      border: none;
-      padding: 10px 16px;
-      border-radius: 9px;
-      margin-right: 12px;
+    /* ============ DRAG & DROP UPLOAD ============ */
+    .dropzone {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      background: var(--paper);
       cursor: pointer;
-      transition: filter 0.15s ease;
+      transition: border-color 0.15s ease, background 0.15s ease;
     }
-    input[type="file"]::file-selector-button:hover { filter: brightness(1.08); }
-
-    .hint {
-      font-size: 0.78rem;
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--brand-orange);
+      background: #fff6e9;
+    }
+    /* Visually hide the real input; the whole .dropzone is a <label for> that
+       triggers it, so a tap anywhere (incl. mobile camera/gallery) opens it —
+       without an overlay that would block the Remove button. */
+    .dropzone input[type="file"] {
+      position: absolute;
+      width: 1px; height: 1px;
+      opacity: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      pointer-events: none;
+    }
+    .dz-thumb {
+      flex-shrink: 0;
+      width: 58px; height: 58px;
+      border-radius: 9px;
+      background: #efe2cd center/cover no-repeat;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      color: var(--ink-soft);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .dz-text { min-width: 0; }
+    .dz-title {
+      font-weight: 900;
+      font-size: 0.92rem;
+      color: #3a2206;
+    }
+    .dz-sub {
       font-weight: 700;
-      color: #8a6a3a;
-      margin-top: 5px;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    .dz-clear {
+      position: relative;
+      z-index: 2;
+      margin-left: auto;
+      flex-shrink: 0;
+      border: none;
+      background: none;
+      color: #b3261e;
+      font-weight: 900;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 8px 8px;   /* larger tap target on phones */
+      display: none;
+    }
+    .dropzone.has-file .dz-clear { display: block; }
 
     .note {
       display: inline-block;
@@ -159,11 +330,7 @@
     }
 
     /* segmented radio group */
-    .segmented {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .segmented { display: flex; gap: 10px; flex-wrap: wrap; }
     .segmented input { position: absolute; opacity: 0; pointer-events: none; }
     .segmented label {
       flex: 1 1 0;
@@ -171,40 +338,32 @@
       margin: 0;
       text-align: center;
       padding: 12px 10px;
-      border: 2px solid #d8c4a4;
+      border: 2px solid var(--line);
       border-radius: 10px;
-      background: #fffdf8;
+      background: var(--paper);
       cursor: pointer;
       font-weight: 900;
-      color: #6b4a18;
+      color: var(--ink-soft);
       transition: all 0.15s ease;
     }
     .segmented input:checked + label {
-      border-color: #c97f1a;
-      background: linear-gradient(135deg, #c97f1a 0%, #9c5e0d 100%);
+      border-color: var(--brand-orange);
+      background: linear-gradient(135deg, var(--brand-orange), var(--brand-orange-dk));
       color: #fff;
       box-shadow: 0 3px 0 rgba(0,0,0,0.18);
     }
 
     /* color swatch picker */
-    .swatches {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .swatch-hint {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #8a6a3a;
-    }
+    .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+    .swatch-hint { font-size: 0.85rem; font-weight: 700; color: var(--ink-soft); }
     .swatch {
       display: flex;
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
-      border: 2px solid #d8c4a4;
+      border: 2px solid var(--line);
       border-radius: 10px;
-      background: #fffdf8;
+      background: var(--paper);
       cursor: pointer;
       font-family: 'Nunito', sans-serif;
       font-weight: 900;
@@ -212,22 +371,37 @@
       color: #3a2206;
       transition: all 0.15s ease;
     }
-    .swatch:hover { border-color: #c97f1a; }
+    .swatch:hover { border-color: var(--brand-orange); transform: translateY(-1px); }
     .swatch.selected {
-      border-color: #c97f1a;
+      border-color: var(--brand-orange);
       background: #fff4e2;
       box-shadow: 0 0 0 3px rgba(201,127,26,0.2);
     }
     .swatch .dot {
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border-radius: 50%;
       border: 1px solid rgba(0,0,0,0.25);
       flex-shrink: 0;
     }
 
+    /* order summary */
+    .summary {
+      margin-top: 4px;
+      background: #fff6e9;
+      border: 1.5px solid #f0d6a8;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-weight: 800;
+      font-size: 0.86rem;
+      color: var(--ink-soft);
+      line-height: 1.7;
+    }
+    .summary strong { color: var(--ink); }
+    .summary .row { display: flex; justify-content: space-between; gap: 12px; }
+
     .submit-btn {
       width: 100%;
+      margin-top: 20px;
       padding: 16px;
       border: none;
       border-radius: 12px;
@@ -237,7 +411,7 @@
       letter-spacing: 0.5px;
       color: #fff;
       cursor: pointer;
-      background: linear-gradient(135deg, #00c244 0%, #009e36 100%);
+      background: linear-gradient(135deg, var(--go) 0%, var(--go-dk) 100%);
       box-shadow: 0 4px 0 rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.2);
       transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
     }
@@ -245,17 +419,26 @@
     .submit-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.28); }
     .submit-btn:disabled { filter: grayscale(0.4) brightness(0.9); cursor: not-allowed; transform: none; }
 
+    .reassure {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+    }
+
     .result {
       margin-top: 16px;
       text-align: center;
       font-weight: 900;
       font-size: 0.95rem;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 16px 14px;
+      border-radius: 12px;
       display: none;
     }
     .result.success { display: block; background: #e3f9e6; color: #1c7a30; border: 2px solid #9bdfae; }
     .result.error   { display: block; background: #fdecea; color: #b3261e; border: 2px solid #f1a9a4; }
+    .result .big { display: block; font-family: 'Bangers', cursive; font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 4px; }
 
     .back-link {
       margin-top: 6px;
@@ -278,6 +461,14 @@
       from { transform: translateY(18px); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }
     }
+
+    @media (max-width: 420px) {
+      .binder { width: 168px; height: 216px; }
+      .heading { font-size: 1.8rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -285,83 +476,151 @@
 
     <img class="logo" src="logo.png" alt="Krusty Kardboard TCG" />
     <h1 class="heading">Custom Binder Request</h1>
+    <p class="subheading">Your art. Your colors. One-of-a-kind binder.</p>
     <div class="divider"></div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="preview-wrap">
+      <div>
+        <div class="binder" id="binderPreview">
+          <div class="binder-art" id="binderArt">
+            <span class="placeholder" id="binderPlaceholder">Your art<br/>goes here</span>
+          </div>
+        </div>
+        <p class="preview-caption" id="previewCaption">Live Preview</p>
+      </div>
+    </div>
 
     <form id="binderForm" class="card">
       <!-- Honeypot spam protection -->
       <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" />
 
-      <div class="field">
-        <label for="name">Name <span class="req">*</span></label>
-        <input type="text" id="name" name="name" autocomplete="name" required />
-      </div>
+      <!-- SECTION 1: DESIGN -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-num">1</span>
+          <span class="section-title">Design Your Binder</span>
+        </div>
+        <div class="section-body">
 
-      <div class="field">
-        <label for="phone">Phone <span class="req">*</span></label>
-        <input type="tel" id="phone" name="phone" autocomplete="tel" required />
-      </div>
+          <div class="field">
+            <label for="front_image">Front Image <span class="req">*</span></label>
+            <label class="dropzone" id="dz_front" for="front_image">
+              <span class="dz-thumb" id="thumb_front">&#128247;</span>
+              <span class="dz-text">
+                <span class="dz-title">Drop your front artwork here</span>
+                <span class="dz-sub" id="sub_front">or tap to browse &bull; PNG / JPG</span>
+              </span>
+              <input type="file" id="front_image" name="front_image" accept="image/*" required />
+              <button type="button" class="dz-clear" data-target="front_image">Remove</button>
+            </label>
+          </div>
 
-      <div class="field">
-        <label for="email">Email <span class="req">*</span></label>
-        <input type="email" id="email" name="email" autocomplete="email" required />
-      </div>
+          <div class="field">
+            <label for="back_image">Back Image</label>
+            <label class="dropzone" id="dz_back" for="back_image">
+              <span class="dz-thumb" id="thumb_back">&#128247;</span>
+              <span class="dz-text">
+                <span class="dz-title">Drop your back artwork (optional)</span>
+                <span class="dz-sub" id="sub_back">or tap to browse</span>
+              </span>
+              <input type="file" id="back_image" name="back_image" accept="image/*" />
+              <button type="button" class="dz-clear" data-target="back_image">Remove</button>
+            </label>
+            <span class="note">&#9733; Back images are an extra charge</span>
+          </div>
 
-      <div class="field">
-        <label for="address">Shipping Address <span class="req">*</span></label>
-        <textarea id="address" name="address" autocomplete="street-address" placeholder="Street, City, State, ZIP" required></textarea>
-      </div>
+          <div class="field">
+            <label>Binder Type <span class="req">*</span></label>
+            <div class="segmented">
+              <input type="radio" id="type_toploader" name="binder_type" value="Toploader (Morabto Binder)" data-brand="Morabto" required />
+              <label for="type_toploader">Toploader (Morabto)</label>
+              <input type="radio" id="type_no_toploader" name="binder_type" value="Non-Toploader (Vault X Binder)" data-brand="Vault X" />
+              <label for="type_no_toploader">Non-Toploader (Vault&nbsp;X)</label>
+            </div>
+          </div>
 
-      <div class="field">
-        <label for="front_image">Front Image <span class="req">*</span></label>
-        <input type="file" id="front_image" name="front_image" accept="image/*" required />
-        <p class="hint">The artwork / photo you want on the front of your binder.</p>
-      </div>
+          <div class="field">
+            <label>Binder Size <span class="req">*</span></label>
+            <div class="segmented">
+              <input type="radio" id="size_4" name="binder_size" value="4 cards per page" required />
+              <label for="size_4">4 cards per page</label>
+              <input type="radio" id="size_9" name="binder_size" value="9 cards per page" />
+              <label for="size_9">9 cards per page</label>
+            </div>
+          </div>
 
-      <div class="field">
-        <label for="back_image">Back Image</label>
-        <input type="file" id="back_image" name="back_image" accept="image/*" />
-        <span class="note">&#9733; Back images are an extra charge</span>
-      </div>
+          <!-- Brand is implied by the binder type (Toploader = Morabto,
+               Non-Toploader = Vault X) and stored here for the email. -->
+          <input type="hidden" name="binder_brand" id="binder_brand" />
 
-      <div class="field">
-        <label>Binder Type <span class="req">*</span></label>
-        <div class="segmented">
-          <input type="radio" id="type_toploader" name="binder_type" value="Toploader (Morabto Binder)" data-brand="Morabto" required />
-          <label for="type_toploader">Toploader (Morabto)</label>
-          <input type="radio" id="type_no_toploader" name="binder_type" value="Non-Toploader (Vault X Binder)" data-brand="Vault X" />
-          <label for="type_no_toploader">Non-Toploader (Vault&nbsp;X)</label>
+          <div class="field">
+            <label>Binder Color <span class="req">*</span></label>
+            <div class="swatches" id="swatches">
+              <p class="swatch-hint">Pick a binder type and size above to see available colors.</p>
+            </div>
+            <input type="hidden" name="binder_color" id="binder_color" />
+          </div>
+
         </div>
       </div>
 
-      <div class="field">
-        <label>Binder Size <span class="req">*</span></label>
-        <div class="segmented">
-          <input type="radio" id="size_4" name="binder_size" value="4 cards per page" required />
-          <label for="size_4">4 cards per page</label>
-          <input type="radio" id="size_9" name="binder_size" value="9 cards per page" />
-          <label for="size_9">9 cards per page</label>
+      <!-- SECTION 2: YOUR INFO -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-num">2</span>
+          <span class="section-title">Your Info</span>
+        </div>
+        <div class="section-body">
+
+          <div class="field">
+            <label for="name">Name <span class="req">*</span></label>
+            <input type="text" id="name" name="name" autocomplete="name" required />
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone <span class="req">*</span></label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" required />
+          </div>
+
+          <div class="field">
+            <label for="email">Email <span class="req">*</span></label>
+            <input type="email" id="email" name="email" autocomplete="email" required />
+          </div>
+
+          <div class="field">
+            <label for="address">Shipping Address <span class="req">*</span></label>
+            <textarea id="address" name="address" autocomplete="street-address" placeholder="Street, City, State, ZIP" required></textarea>
+          </div>
+
+          <div class="field">
+            <label for="notes">Additional Notes</label>
+            <textarea id="notes" name="notes" placeholder="Color details, sizing, or anything else we should know."></textarea>
+          </div>
+
         </div>
       </div>
 
-      <!-- Brand is implied by the binder type (Toploader = Morabto,
-           Non-Toploader = Vault X) and stored here for the email. -->
-      <input type="hidden" name="binder_brand" id="binder_brand" />
-
-      <div class="field">
-        <label>Binder Color <span class="req">*</span></label>
-        <div class="swatches" id="swatches">
-          <p class="swatch-hint">Pick a binder type and size above to see available colors.</p>
+      <!-- SECTION 3: REVIEW -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-num">3</span>
+          <span class="section-title">Review &amp; Send</span>
         </div>
-        <input type="hidden" name="binder_color" id="binder_color" />
+        <div class="section-body">
+          <div class="summary" id="summary">
+            <div class="row"><span>Binder</span><strong id="sum_type">&mdash;</strong></div>
+            <div class="row"><span>Layout</span><strong id="sum_size">&mdash;</strong></div>
+            <div class="row"><span>Color</span><strong id="sum_color">&mdash;</strong></div>
+            <div class="row"><span>Back image</span><strong id="sum_back">No</strong></div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
+          <p class="reassure">&#128274; No payment now &bull; We&rsquo;ll confirm price &amp; details by email</p>
+          <div class="result" id="result"></div>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="notes">Additional Notes</label>
-        <textarea id="notes" name="notes" placeholder="Color details, sizing, or anything else we should know."></textarea>
-      </div>
-
-      <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
-      <div class="result" id="result"></div>
     </form>
 
     <a class="back-link" href="index.html">&larr; Back to Home</a>
@@ -413,6 +672,50 @@
     const colorInput = document.getElementById('binder_color');
     const brandInput = document.getElementById('binder_brand');
 
+    // Live preview + summary elements
+    const binderPreview = document.getElementById('binderPreview');
+    const binderArt = document.getElementById('binderArt');
+    const binderPlaceholder = document.getElementById('binderPlaceholder');
+    const previewCaption = document.getElementById('previewCaption');
+    const sumType = document.getElementById('sum_type');
+    const sumSize = document.getElementById('sum_size');
+    const sumColor = document.getElementById('sum_color');
+    const sumBack = document.getElementById('sum_back');
+
+    // Darken a hex color for the cover gradient's second stop.
+    function shade(hex, amt) {
+      const n = parseInt(hex.replace('#', ''), 16);
+      let r = (n >> 16) + amt, g = ((n >> 8) & 0xff) + amt, b = (n & 0xff) + amt;
+      r = Math.max(0, Math.min(255, r));
+      g = Math.max(0, Math.min(255, g));
+      b = Math.max(0, Math.min(255, b));
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function updatePreview() {
+      const color = colorInput.value;
+      if (color) {
+        const hex = COLOR_HEX[color] || '#888888';
+        binderPreview.style.setProperty('--cover',
+          'linear-gradient(135deg, ' + shade(hex, 20) + ', ' + shade(hex, -35) + ')');
+        previewCaption.textContent = color + ' Binder';
+      } else {
+        binderPreview.style.removeProperty('--cover');
+        previewCaption.textContent = 'Live Preview';
+      }
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const typeEl = form.querySelector('input[name="binder_type"]:checked');
+      const sizeEl = form.querySelector('input[name="binder_size"]:checked');
+      sumType.textContent = typeEl ? (typeEl.dataset.brand + (typeEl.value.indexOf('Toploader') === 0 ? ' · Toploader' : ' · Non-Toploader')) : '—';
+      sumSize.textContent = sizeEl ? sizeEl.value : '—';
+      sumColor.textContent = colorInput.value || '—';
+      const back = document.getElementById('back_image');
+      sumBack.textContent = (back.files && back.files.length) ? 'Yes (extra charge)' : 'No';
+    }
+
     function renderSwatches() {
       // Brand is derived from the chosen binder type (Toploader = Morabto,
       // Non-Toploader = Vault X) via the radio's data-brand attribute.
@@ -424,12 +727,14 @@
 
       if (!brand || !size) {
         swatches.innerHTML = '<p class="swatch-hint">Pick a binder type and size above to see available colors.</p>';
+        updatePreview();
         return;
       }
 
       const colors = (BINDER_COLORS[brand] && BINDER_COLORS[brand][size.value]) || [];
       if (!colors.length) {
         swatches.innerHTML = '<p class="swatch-hint">No colors are listed for this option yet — please use Additional Notes.</p>';
+        updatePreview();
         return;
       }
 
@@ -443,18 +748,86 @@
           swatches.querySelectorAll('.swatch').forEach(function (s) { s.classList.remove('selected'); });
           btn.classList.add('selected');
           colorInput.value = name;
+          updatePreview();
         });
         swatches.appendChild(btn);
       });
+      updatePreview();
     }
 
     form.querySelectorAll('input[name="binder_type"], input[name="binder_size"]').forEach(function (el) {
       el.addEventListener('change', renderSwatches);
     });
 
-    function showResult(type, message) {
+    /* ============ Drag & drop + image preview ============ */
+    function setupDropzone(dzId, inputId, thumbId, subId, isFront) {
+      const dz = document.getElementById(dzId);
+      const input = document.getElementById(inputId);
+      const thumb = document.getElementById(thumbId);
+      const sub = document.getElementById(subId);
+      const defaultSub = sub.textContent;
+
+      function showFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        const url = URL.createObjectURL(file);
+        thumb.style.backgroundImage = 'url("' + url + '")';
+        thumb.textContent = '';
+        sub.textContent = file.name;
+        dz.classList.add('has-file');
+        if (isFront) {
+          binderArt.style.backgroundImage = 'url("' + url + '")';
+          binderPlaceholder.style.display = 'none';
+        }
+        updateSummary();
+      }
+
+      function clearFile() {
+        input.value = '';
+        thumb.style.backgroundImage = '';
+        thumb.innerHTML = '&#128247;';
+        sub.textContent = defaultSub;
+        dz.classList.remove('has-file');
+        if (isFront) {
+          binderArt.style.backgroundImage = '';
+          binderPlaceholder.style.display = '';
+        }
+        updateSummary();
+      }
+
+      input.addEventListener('change', function () {
+        if (input.files && input.files[0]) showFile(input.files[0]);
+        else clearFile();
+      });
+
+      // Drag styling + drop handling
+      ['dragenter', 'dragover'].forEach(function (ev) {
+        dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('dragover'); });
+      });
+      ['dragleave', 'dragend', 'drop'].forEach(function (ev) {
+        dz.addEventListener(ev, function () { dz.classList.remove('dragover'); });
+      });
+      dz.addEventListener('drop', function (e) {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          input.files = e.dataTransfer.files;
+          showFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      const clearBtn = dz.querySelector('.dz-clear');
+      clearBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearFile();
+      });
+    }
+
+    setupDropzone('dz_front', 'front_image', 'thumb_front', 'sub_front', true);
+    setupDropzone('dz_back', 'back_image', 'thumb_back', 'sub_back', false);
+
+    function showResult(type, message, big) {
       result.className = 'result ' + type;
-      result.textContent = message;
+      result.innerHTML = (big ? '<span class="big">' + big + '</span>' : '') + message;
       result.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -482,8 +855,18 @@
         const data = await response.json();
 
         if (data.success) {
-          showResult('success', 'Thanks! Your custom binder request has been sent. We’ll be in touch soon.');
+          showResult('success', 'Your custom binder request has been sent. We&rsquo;ll be in touch soon.', 'Thanks!');
           form.reset();
+          renderSwatches();
+          document.getElementById('dz_front').classList.remove('has-file');
+          document.getElementById('dz_back').classList.remove('has-file');
+          document.getElementById('thumb_front').style.backgroundImage = '';
+          document.getElementById('thumb_front').innerHTML = '&#128247;';
+          document.getElementById('thumb_back').style.backgroundImage = '';
+          document.getElementById('thumb_back').innerHTML = '&#128247;';
+          binderArt.style.backgroundImage = '';
+          binderPlaceholder.style.display = '';
+          updateSummary();
         } else {
           showResult('error', data.message || 'Something went wrong. Please try again.');
         }
