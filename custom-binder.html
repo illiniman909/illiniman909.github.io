@@ -135,8 +135,7 @@
     }
     /* Zipper trim running around each panel's edge */
     .page-right::before,
-    .page-left::before,
-    .cover-front::before {
+    .page-left::before {
       content: ''; position: absolute; inset: 4px;
       border-radius: 3px;
       border: 2px dotted rgba(0,0,0,0.5);
@@ -171,16 +170,32 @@
       backface-visibility: hidden;
       overflow: hidden;
     }
-    /* Front of the cover — the chosen colour (seen when closed) */
+    /* Front of the cover — woven fabric in the chosen colour, with a black
+       zipper band around the edge (seen when closed). */
     .cover-front {
       transform: rotateY(180deg);
-      border-radius: 7px 3px 3px 7px;
-      background: var(--cover, linear-gradient(135deg, #3a3f47, #23262c));
-      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.18), 0 14px 26px rgba(0,0,0,0.4);
+      /* black zipper teeth around the whole perimeter */
+      border: 7px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #0f0f0f 0 3px, #363636 3px 6px) 7;
+      background:
+        /* fine woven grid */
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.09) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(0deg,  rgba(0,0,0,0.09) 0 1px, transparent 1px 3px),
+        /* colour */
+        var(--cover, linear-gradient(135deg, #3a3f47, #23262c));
+      box-shadow: 0 14px 26px rgba(0,0,0,0.4);
     }
-    .cover-front::after {   /* sheen */
+    /* stitched seam just inside the zipper */
+    .cover-front::before {
+      content: ''; position: absolute; inset: 6px;
+      border-radius: 3px;
+      border: 1px dashed rgba(255,255,255,0.30);
+      pointer-events: none; z-index: 1;
+    }
+    /* matte fabric sheen + edge shading */
+    .cover-front::after {
       content: ''; position: absolute; inset: 0;
-      background: linear-gradient(115deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 45%);
+      background: linear-gradient(120deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.13) 100%);
     }
     /* Inside-left page (back of the leaf, seen when open) */
     .page-left {
@@ -548,7 +563,6 @@
           <div class="binder-leaf">
             <div class="leaf-face cover-front">
               <span class="zipper-pull"></span>
-              <span class="cover-label">&#9733; Custom<br/>Binder</span>
             </div>
             <div class="leaf-face page-left"><div class="pockets" id="binderArtLeft"></div></div>
           </div>
