@@ -112,47 +112,13 @@
       height: 172px;
       margin: 34px 0 14px;
       transform-style: preserve-3d;
-      transform: translateX(-68px) rotateX(26deg) rotateY(-17deg);
+      /* closed: straight-on, top-down product view */
+      transform: translateX(-75px);
       transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
       cursor: pointer;
     }
     .binder:hover,
-    .binder.open { transform: translateX(0) rotateX(18deg) rotateY(0deg); }
-
-    /* ---- Closed-binder thickness (the 5.5cm zip edge) ---- */
-    .binder-depth {
-      position: absolute; left: 50%; top: 0; width: 150px; height: 100%;
-      transform-style: preserve-3d;
-      pointer-events: none; z-index: 2;
-      opacity: 1; transition: opacity 0.35s ease;
-    }
-    .binder:hover .binder-depth,
-    .binder.open .binder-depth { opacity: 0; }
-    .binder-depth span {
-      position: absolute;
-      background:
-        /* zipper teeth running along the edge */
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.10) 0 2px, transparent 2px 5px),
-        linear-gradient(#242424, #101010);
-    }
-    /* bottom edge face */
-    .depth-bottom {
-      left: 3px; right: 3px; bottom: 0; height: 24px;
-      transform-origin: bottom; transform: rotateX(-90deg);
-    }
-    /* right edge face */
-    .depth-right {
-      top: 2px; bottom: 2px; right: 0; width: 24px;
-      transform-origin: right; transform: rotateY(90deg);
-      background:
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.10) 0 2px, transparent 2px 5px),
-        linear-gradient(90deg, #242424, #101010);
-    }
-    /* top edge face */
-    .depth-top {
-      left: 3px; right: 3px; top: 0; height: 24px;
-      transform-origin: top; transform: rotateX(90deg);
-    }
+    .binder.open { transform: translateX(0) rotateX(14deg); }
 
     /* A page holds the card pockets (dark plastic, like the reference) */
     .page {
@@ -161,7 +127,14 @@
       background: linear-gradient(150deg, #34353b, #1e1f23);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), 0 14px 26px rgba(0,0,0,0.4);
     }
-    .page-right { left: 50%; border-radius: 3px 7px 7px 3px; }
+    /* Hidden while closed so its dark corners don't peek out from behind
+       the cover; fades in as the binder opens. */
+    .page-right {
+      left: 50%; border-radius: 3px 7px 7px 3px;
+      opacity: 0; transition: opacity 0.3s ease 0.15s;
+    }
+    .binder:hover .page-right,
+    .binder.open .page-right { opacity: 1; }
     .pockets { display: grid; gap: 6px; height: 100%; grid-template-columns: repeat(3, 1fr); }
     .pocket {
       border-radius: 2px;
@@ -193,8 +166,8 @@
       position: absolute; top: 0; right: 50%; width: 150px; height: 100%;
       transform-origin: right center;
       transform-style: preserve-3d;
-      /* closed: folded over the right page, raised to the top of the slab */
-      transform: translateZ(24px) rotateY(180deg);
+      /* closed: folded flat over the right page */
+      transform: translateZ(2px) rotateY(180deg);
       transition: transform 0.7s cubic-bezier(0.4,0.15,0.2,1);
       z-index: 3;
     }
@@ -207,28 +180,36 @@
       overflow: hidden;
     }
     /* Front of the cover — smooth matte PU-leather in the chosen colour,
-       with a thin black zipper around the rounded edge (seen when closed). */
+       top-down product view (seen when closed). The leaf's own 180° flip
+       cancels this face's rotateY(180deg), so it renders UNMIRRORED:
+       CSS-left is the visual left, where the spine/binding sits. */
     .cover-front {
       transform: rotateY(180deg);
-      border-radius: 11px;
+      /* tighter corners on the spine (left), rounder on the opening edge */
+      border-radius: 6px 12px 12px 6px;
       background:
         /* barely-there diagonal PU grain */
-        repeating-linear-gradient(45deg, rgba(0,0,0,0.028) 0 1px, transparent 1px 5px),
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.025) 0 1px, transparent 1px 5px),
         var(--cover, linear-gradient(140deg, #3a3f47, #23262c));
-      /* thin black zip tape ring + soft drop shadow */
-      box-shadow: 0 0 0 3px #191919, 0 16px 28px rgba(0,0,0,0.42);
+      /* hairline dark edge + soft drop shadow */
+      box-shadow: 0 0 0 1.5px rgba(12,12,14,0.8), 0 14px 26px rgba(0,0,0,0.38);
     }
-    /* fine tonal stitch line just inside the zip */
+    /* tonal stitch line following the contour just inside the edge */
     .cover-front::before {
-      content: ''; position: absolute; inset: 8px;
-      border-radius: 6px;
-      border: 1px dashed rgba(0,0,0,0.16);
+      content: ''; position: absolute; inset: 6px;
+      border-radius: 4px 8px 8px 4px;
+      border: 1px dashed rgba(0,0,0,0.22);
       pointer-events: none; z-index: 1;
     }
-    /* soft matte sheen, top-lit */
+    /* spine/binding contour on the left + soft top light */
     .cover-front::after {
-      content: ''; position: absolute; inset: 0; border-radius: 11px;
-      background: linear-gradient(160deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.03) 32%, rgba(0,0,0,0.10) 100%);
+      content: ''; position: absolute; inset: 0;
+      border-radius: 6px 12px 12px 6px;
+      background:
+        /* binding curve: shadow into a soft highlight where the cover wraps */
+        linear-gradient(to right, rgba(0,0,0,0.30) 0, rgba(0,0,0,0.14) 7px, rgba(255,255,255,0.09) 13px, rgba(0,0,0,0) 24px),
+        /* top-lit matte sheen */
+        linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.02) 30%, rgba(0,0,0,0.05) 78%, rgba(0,0,0,0.12) 100%);
     }
     /* Inside-left page (back of the leaf, seen when open) */
     .page-left {
@@ -580,11 +561,6 @@
         <div class="binder" id="binderPreview" role="button" tabindex="0"
              aria-label="Binder preview — hover or tap to open it">
           <div class="page page-right"><div class="pockets" id="binderArt"></div></div>
-          <div class="binder-depth">
-            <span class="depth-bottom"></span>
-            <span class="depth-right"></span>
-            <span class="depth-top"></span>
-          </div>
           <div class="binder-gutter"></div>
           <div class="binder-leaf">
             <div class="leaf-face cover-front"></div>
