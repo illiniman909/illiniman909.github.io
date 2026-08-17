@@ -137,17 +137,21 @@
       background: linear-gradient(160deg, rgba(120,170,210,0.30), rgba(120,170,210,0.10));
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.65), 0 1px 2px rgba(0,0,0,0.12);
     }
-    /* Ring binding on the spine */
-    .binder-rings {
-      position: absolute; left: 7px; top: 24px; bottom: 24px; width: 12px;
-      display: flex; flex-direction: column; justify-content: space-around;
+    /* Bound (sewn) spine — these are zip binders, NOT three-ring */
+    .binder-spine {
+      position: absolute; left: 13px; top: 10px; bottom: 10px; width: 10px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, rgba(0,0,0,0.24), rgba(0,0,0,0.04));
+      box-shadow: 1px 0 2px rgba(0,0,0,0.15);
       transform: translateZ(2px);
       z-index: 3;
     }
-    .binder-rings span {
-      height: 11px; border-radius: 50%;
-      background: linear-gradient(#f2f2f2, #9a9a9a);
-      box-shadow: 0 1px 1px rgba(0,0,0,0.35);
+    /* stitching down the binding */
+    .binder-spine::after {
+      content: ''; position: absolute; left: 3px; top: 4px; bottom: 4px; width: 2px;
+      border-radius: 2px;
+      background: repeating-linear-gradient(to bottom,
+        rgba(255,255,255,0.55) 0 5px, transparent 5px 12px);
     }
 
     /* The cover that swings open on hover / tap */
@@ -183,6 +187,18 @@
     .cover-front::after {
       content: ''; position: absolute; inset: 0;
       background: linear-gradient(115deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 42%);
+    }
+    /* Zipper pull tab — signals a zip-up card binder */
+    .zipper-pull {
+      position: absolute; top: 12px; right: 14px; z-index: 2;
+      width: 15px; height: 9px; border-radius: 3px;
+      background: linear-gradient(#efefef, #9a9a9a);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .zipper-pull::after {
+      content: ''; position: absolute; top: 8px; left: 5px;
+      width: 5px; height: 9px;
+      border: 1.5px solid #9a9a9a; border-top: none; border-radius: 0 0 3px 3px;
     }
     .cover-label {
       position: absolute; left: 50%; top: 50%;
@@ -541,9 +557,10 @@
              aria-label="Binder preview — hover or tap to open it">
           <div class="binder-base"></div>
           <div class="binder-pages" id="binderArt"></div>
-          <div class="binder-rings"><span></span><span></span><span></span></div>
+          <div class="binder-spine"></div>
           <div class="binder-cover">
             <div class="cover-face cover-front">
+              <span class="zipper-pull"></span>
               <span class="cover-label">&#9733; Custom<br/>Binder</span>
             </div>
             <div class="cover-face cover-back"></div>
