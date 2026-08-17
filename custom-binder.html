@@ -109,7 +109,7 @@
     .binder {
       position: relative;
       width: 300px;
-      height: 196px;
+      height: 172px;
       margin: 12px 0 4px;
       transform-style: preserve-3d;
       transform: translateX(-75px) rotateX(12deg) rotateY(-13deg);
@@ -122,7 +122,7 @@
     /* A page holds the card pockets (dark plastic, like the reference) */
     .page {
       position: absolute; top: 0; width: 150px; height: 100%;
-      padding: 12px;
+      padding: 11px 17px;  /* wider side padding keeps pockets card-shaped (portrait) */
       background: linear-gradient(150deg, #34353b, #1e1f23);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), 0 14px 26px rgba(0,0,0,0.4);
     }
@@ -197,21 +197,9 @@
     /* Inside-left page (back of the leaf, seen when open) */
     .page-left {
       border-radius: 7px 3px 3px 7px;
-      padding: 12px;
+      padding: 11px 17px;
       background: linear-gradient(150deg, #34353b, #1e1f23);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-    }
-    /* Small black zipper slider parked in the corner */
-    .zipper-pull {
-      position: absolute; bottom: 12px; right: 10px; z-index: 3;
-      width: 8px; height: 13px; border-radius: 2px;
-      background: linear-gradient(#3a3a3a, #0e0e0e);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
-    }
-    .zipper-pull::after {
-      content: ''; position: absolute; bottom: 1px; left: 2px;
-      width: 4px; height: 6px;
-      border: 1.5px solid #050505; border-top: none; border-radius: 0 0 2px 2px;
     }
     .cover-label {
       position: absolute; left: 50%; top: 50%;
@@ -558,9 +546,7 @@
           <div class="page page-right"><div class="pockets" id="binderArt"></div></div>
           <div class="binder-gutter"></div>
           <div class="binder-leaf">
-            <div class="leaf-face cover-front">
-              <span class="zipper-pull"></span>
-            </div>
+            <div class="leaf-face cover-front"></div>
             <div class="leaf-face page-left"><div class="pockets" id="binderArtLeft"></div></div>
           </div>
         </div>
