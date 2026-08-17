@@ -94,76 +94,123 @@
       animation: fadeUp 0.5s 0.3s ease both;
     }
 
-    /* ============ LIVE BINDER PREVIEW ============ */
+    /* ============ LIVE 3D BINDER PREVIEW ============ */
     .preview-wrap {
       width: 100%;
       display: flex;
       justify-content: center;
-      perspective: 900px;
+      perspective: 1500px;
       animation: fadeUp 0.5s 0.32s ease both;
     }
     .binder {
       position: relative;
-      width: 200px;
-      height: 256px;
-      border-radius: 8px 14px 14px 8px;
-      background: var(--cover, linear-gradient(135deg, #3a3f47, #23262c));
-      box-shadow:
-        0 10px 30px rgba(0,0,0,0.4),
-        inset 0 0 0 2px rgba(255,255,255,0.06);
-      transform: rotateY(-16deg) rotateX(4deg);
-      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), background 0.35s ease;
+      width: 210px;
+      height: 264px;
       transform-style: preserve-3d;
+      transform: rotateX(6deg) rotateY(-14deg);
+      transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+      cursor: pointer;
     }
-    .binder:hover { transform: rotateY(-6deg) rotateX(2deg); }
-    /* spine */
-    .binder::before {
-      content: '';
+    .binder:hover { transform: rotateX(4deg) rotateY(-6deg); }
+
+    /* Back board of the binder */
+    .binder-base {
+      position: absolute; inset: 0;
+      border-radius: 6px 12px 12px 6px;
+      background: linear-gradient(120deg, #6a5844, #4c3d2c);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.45);
+    }
+    /* Inside pages that hold the card pockets */
+    .binder-pages {
       position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 16px;
-      border-radius: 8px 0 0 8px;
-      background: rgba(0,0,0,0.28);
-      box-shadow: inset -3px 0 6px rgba(0,0,0,0.35);
+      left: 15px; right: 7px; top: 7px; bottom: 7px;
+      border-radius: 3px 8px 8px 3px;
+      background: linear-gradient(120deg, #fffdf6, #efe6d3);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), inset 4px 0 10px rgba(0,0,0,0.12);
+      display: grid;
+      gap: 9px;
+      padding: 18px 16px;
+      grid-template-columns: repeat(3, 1fr);
     }
-    /* rings hint */
-    .binder::after {
-      content: '';
-      position: absolute;
-      left: 6px; top: 22px; bottom: 22px;
-      width: 4px;
-      border-radius: 4px;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.55) 0 8px,
-        transparent 8px 26px
-      );
-      opacity: 0.5;
+    .pocket {
+      border-radius: 3px;
+      background: linear-gradient(160deg, rgba(120,170,210,0.30), rgba(120,170,210,0.10));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.65), 0 1px 2px rgba(0,0,0,0.12);
     }
-    .binder-art {
-      position: absolute;
-      left: 26px; right: 12px; top: 14px; bottom: 14px;
-      border-radius: 4px;
-      background-size: cover;
-      background-position: center;
-      background-color: rgba(255,255,255,0.10);
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25), 0 4px 12px rgba(0,0,0,0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* Ring binding on the spine */
+    .binder-rings {
+      position: absolute; left: 7px; top: 24px; bottom: 24px; width: 12px;
+      display: flex; flex-direction: column; justify-content: space-around;
+      transform: translateZ(2px);
+      z-index: 3;
     }
-    .binder-art .placeholder {
+    .binder-rings span {
+      height: 11px; border-radius: 50%;
+      background: linear-gradient(#f2f2f2, #9a9a9a);
+      box-shadow: 0 1px 1px rgba(0,0,0,0.35);
+    }
+
+    /* The cover that swings open on hover / tap */
+    .binder-cover {
+      position: absolute; inset: 0;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transform: translateZ(5px);
+      transition: transform 0.7s cubic-bezier(0.4,0.15,0.2,1);
+      z-index: 4;
+    }
+    .binder:hover .binder-cover,
+    .binder.open .binder-cover { transform: translateZ(5px) rotateY(-158deg); }
+
+    .cover-face {
+      position: absolute; inset: 0;
+      border-radius: 6px 12px 12px 6px;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+    /* Front of the cover — takes the chosen binder color */
+    .cover-front {
+      background: var(--cover, linear-gradient(135deg, #3a3f47, #23262c));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.08), 0 6px 16px rgba(0,0,0,0.3);
+    }
+    /* Toploader "zip" stitch line around the edge */
+    .cover-front::before {
+      content: ''; position: absolute; inset: 9px;
+      border-radius: 4px 9px 9px 4px;
+      border: 2px dashed rgba(255,255,255,0.32);
+    }
+    /* Soft sheen across the cover */
+    .cover-front::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(115deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 42%);
+    }
+    .cover-label {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
       font-family: 'Bangers', cursive;
-      font-size: 0.85rem;
-      letter-spacing: 0.5px;
-      color: rgba(255,255,255,0.85);
-      text-align: center;
-      line-height: 1.3;
-      padding: 0 10px;
+      letter-spacing: 1px; font-size: 0.72rem;
+      color: rgba(255,255,255,0.92);
       text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      padding: 5px 12px; border-radius: 6px; text-align: center; line-height: 1;
+      background: rgba(0,0,0,0.16);
+      border: 1.5px solid rgba(255,255,255,0.38);
+      z-index: 2;
+    }
+    /* Inside of the cover (seen when open) */
+    .cover-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(120deg, #efe7d6, #d9cdb6);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05);
+    }
+    .cover-back::after {
+      content: 'Toploader Sleeve';
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%) rotateY(180deg);
+      font-family: 'Bangers', cursive; font-size: 0.7rem; letter-spacing: 0.5px;
+      color: rgba(90,66,20,0.5);
     }
     .preview-caption {
-      margin-top: 10px;
+      margin-top: 14px;
       text-align: center;
       font-size: 0.78rem;
       font-weight: 800;
@@ -171,6 +218,14 @@
       text-transform: uppercase;
       color: rgba(255,255,255,0.85);
       text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .preview-hint {
+      margin-top: 4px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
     }
 
     /* ============ CARD / FORM ============ */
@@ -482,12 +537,20 @@
     <!-- LIVE PREVIEW -->
     <div class="preview-wrap">
       <div>
-        <div class="binder" id="binderPreview">
-          <div class="binder-art" id="binderArt">
-            <span class="placeholder" id="binderPlaceholder">Your art<br/>goes here</span>
+        <div class="binder" id="binderPreview" role="button" tabindex="0"
+             aria-label="Binder preview — hover or tap to open it">
+          <div class="binder-base"></div>
+          <div class="binder-pages" id="binderArt"></div>
+          <div class="binder-rings"><span></span><span></span><span></span></div>
+          <div class="binder-cover">
+            <div class="cover-face cover-front">
+              <span class="cover-label">&#9733; Custom<br/>Binder</span>
+            </div>
+            <div class="cover-face cover-back"></div>
           </div>
         </div>
-        <p class="preview-caption" id="previewCaption">Live Preview</p>
+        <p class="preview-caption" id="previewCaption">Live Color Preview</p>
+        <p class="preview-hint">Hover or tap the binder to open it</p>
       </div>
     </div>
 
@@ -533,9 +596,9 @@
           <div class="field">
             <label>Binder Type <span class="req">*</span></label>
             <div class="segmented">
-              <input type="radio" id="type_toploader" name="binder_type" value="Toploader (Morabto Binder)" data-brand="Morabto" required />
-              <label for="type_toploader">Toploader (Morabto)</label>
-              <input type="radio" id="type_no_toploader" name="binder_type" value="Non-Toploader (Vault X Binder)" data-brand="Vault X" />
+              <input type="radio" id="type_toploader" name="binder_type" value="Toploader Binder" data-brand="Toploader" data-summary="Toploader" required />
+              <label for="type_toploader">Toploader</label>
+              <input type="radio" id="type_no_toploader" name="binder_type" value="Non-Toploader (Vault X Binder)" data-brand="Vault X" data-summary="Non-Toploader (Vault X)" />
               <label for="type_no_toploader">Non-Toploader (Vault&nbsp;X)</label>
             </div>
           </div>
@@ -650,8 +713,10 @@
         // From the Amazon listing (ASIN B082J5NZQ3 family).
         '9 cards per page': ['Black', 'Blue', 'Pink', 'Purple', 'Red', 'Teal', 'Yellow']
       },
-      'Morabto': {
-        // From the Amazon listing (ASIN B0DXZD2XSL family).
+      // Unbranded Toploader binder. NOTE: color lists below are PLACEHOLDERS
+      // carried over from the old listing — please replace with the real
+      // available colors for the unbranded toploader.
+      'Toploader': {
         '4 cards per page': ['Black', 'Navy Blue', 'Sky Blue', 'Dark Green', 'Light Green', 'Dark Purple', 'Pink-Purple', 'Light Pink', 'Orange', 'Red'],
         '9 cards per page': ['Black', 'Blue', 'Dark Green', 'Grass Green', 'Light Blue', 'Orange', 'Pink', 'Purple', 'Red', 'Turquoise', 'White']
       }
@@ -675,7 +740,6 @@
     // Live preview + summary elements
     const binderPreview = document.getElementById('binderPreview');
     const binderArt = document.getElementById('binderArt');
-    const binderPlaceholder = document.getElementById('binderPlaceholder');
     const previewCaption = document.getElementById('previewCaption');
     const sumType = document.getElementById('sum_type');
     const sumSize = document.getElementById('sum_size');
@@ -701,15 +765,31 @@
         previewCaption.textContent = color + ' Binder';
       } else {
         binderPreview.style.removeProperty('--cover');
-        previewCaption.textContent = 'Live Preview';
+        previewCaption.textContent = 'Live Color Preview';
       }
+      renderBinderLayout();
       updateSummary();
+    }
+
+    // Draw the card-pocket grid on the cover to match the chosen page size
+    // (4 = 2x2, 9 = 3x3). Defaults to a 3x3 hint before a size is picked.
+    function renderBinderLayout() {
+      const sizeEl = form.querySelector('input[name="binder_size"]:checked');
+      const perPage = sizeEl && sizeEl.value.indexOf('4') === 0 ? 4 : 9;
+      const cols = perPage === 4 ? 2 : 3;
+      binderArt.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+      binderArt.innerHTML = '';
+      for (let i = 0; i < perPage; i++) {
+        const p = document.createElement('span');
+        p.className = 'pocket';
+        binderArt.appendChild(p);
+      }
     }
 
     function updateSummary() {
       const typeEl = form.querySelector('input[name="binder_type"]:checked');
       const sizeEl = form.querySelector('input[name="binder_size"]:checked');
-      sumType.textContent = typeEl ? (typeEl.dataset.brand + (typeEl.value.indexOf('Toploader') === 0 ? ' · Toploader' : ' · Non-Toploader')) : '—';
+      sumType.textContent = typeEl ? typeEl.dataset.summary : '—';
       sumSize.textContent = sizeEl ? sizeEl.value : '—';
       sumColor.textContent = colorInput.value || '—';
       const back = document.getElementById('back_image');
@@ -774,10 +854,6 @@
         thumb.textContent = '';
         sub.textContent = file.name;
         dz.classList.add('has-file');
-        if (isFront) {
-          binderArt.style.backgroundImage = 'url("' + url + '")';
-          binderPlaceholder.style.display = 'none';
-        }
         updateSummary();
       }
 
@@ -787,10 +863,6 @@
         thumb.innerHTML = '&#128247;';
         sub.textContent = defaultSub;
         dz.classList.remove('has-file');
-        if (isFront) {
-          binderArt.style.backgroundImage = '';
-          binderPlaceholder.style.display = '';
-        }
         updateSummary();
       }
 
@@ -825,6 +897,20 @@
     setupDropzone('dz_front', 'front_image', 'thumb_front', 'sub_front', true);
     setupDropzone('dz_back', 'back_image', 'thumb_back', 'sub_back', false);
 
+    // Draw the default preview (3x3 pocket hint) on first load.
+    updatePreview();
+
+    // Touch devices have no hover, so tap (or keyboard) toggles the binder open.
+    binderPreview.addEventListener('click', function () {
+      binderPreview.classList.toggle('open');
+    });
+    binderPreview.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        binderPreview.classList.toggle('open');
+      }
+    });
+
     function showResult(type, message, big) {
       result.className = 'result ' + type;
       result.innerHTML = (big ? '<span class="big">' + big + '</span>' : '') + message;
@@ -858,14 +944,14 @@
           showResult('success', 'Your custom binder request has been sent. We&rsquo;ll be in touch soon.', 'Thanks!');
           form.reset();
           renderSwatches();
-          document.getElementById('dz_front').classList.remove('has-file');
-          document.getElementById('dz_back').classList.remove('has-file');
-          document.getElementById('thumb_front').style.backgroundImage = '';
-          document.getElementById('thumb_front').innerHTML = '&#128247;';
-          document.getElementById('thumb_back').style.backgroundImage = '';
-          document.getElementById('thumb_back').innerHTML = '&#128247;';
-          binderArt.style.backgroundImage = '';
-          binderPlaceholder.style.display = '';
+          ['front', 'back'].forEach(function (which) {
+            document.getElementById('dz_' + which).classList.remove('has-file');
+            const t = document.getElementById('thumb_' + which);
+            t.style.backgroundImage = '';
+            t.innerHTML = '&#128247;';
+            document.getElementById('sub_' + which).textContent =
+              which === 'front' ? 'or tap to browse • PNG / JPG' : 'or tap to browse';
+          });
           updateSummary();
         } else {
           showResult('error', data.message || 'Something went wrong. Please try again.');
