@@ -194,24 +194,31 @@
       /* hairline dark edge + soft drop shadow */
       box-shadow: 0 0 0 1.5px rgba(12,12,14,0.8), 0 14px 26px rgba(0,0,0,0.38);
     }
-    /* Stitch line hugging the edge, on the three zippered sides only —
-       the spine fold (left) has no zipper, so no stitching there. */
+    /* Stitch ring hugging the edge. Its left border is the vertical stitch
+       row that runs alongside the spine-panel seam, full height. */
     .cover-front::before {
-      content: ''; position: absolute; inset: 3px 3px 3px 14px;
+      content: ''; position: absolute; inset: 3px 3px 3px 18px;
       border-radius: 2px 9px 9px 2px;
       border: 1px dashed rgba(0,0,0,0.20);
-      border-left: none;
       pointer-events: none; z-index: 1;
     }
-    /* spine/binding contour on the left + faint top light (matte) */
+    /* Spine panel details + faint top light (matte). Layers, top first:
+       1-2. top & bottom stitch runs crossing the spine strip to the edge
+       3.   the fabric seam where the spine panel meets the cover (full height)
+       4.   soft spine shade
+       5.   barely-there top light */
     .cover-front::after {
       content: ''; position: absolute; inset: 0;
       border-radius: 6px 12px 12px 6px;
       background:
-        /* binding curve: one smooth shadow fading out — no highlight band */
-        linear-gradient(to right, rgba(0,0,0,0.24) 0, rgba(0,0,0,0.10) 8px, rgba(0,0,0,0.03) 16px, rgba(0,0,0,0) 28px),
-        /* barely-there top light */
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.20) 0 3px, rgba(0,0,0,0) 3px 6px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.20) 0 3px, rgba(0,0,0,0) 3px 6px),
+        linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
+        linear-gradient(to right, rgba(0,0,0,0.22) 0, rgba(0,0,0,0.09) 8px, rgba(0,0,0,0.02) 15px, rgba(0,0,0,0) 26px),
         linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 30%, rgba(0,0,0,0.03) 80%, rgba(0,0,0,0.07) 100%);
+      background-position: 3px 3px, 3px calc(100% - 4px), 15px 0, 0 0, 0 0;
+      background-size: 15px 1px, 15px 1px, 1.5px 100%, 100% 100%, 100% 100%;
+      background-repeat: no-repeat;
     }
     /* Inside-left page (back of the leaf, seen when open) */
     .page-left {
