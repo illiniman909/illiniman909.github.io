@@ -588,7 +588,7 @@
           </div>
         </div>
         <p class="preview-caption" id="previewCaption">Live Color Preview</p>
-        <p class="preview-hint">Hover or tap the binder to open it</p>
+        <p class="preview-hint" id="previewHint">Hover over the binder to open it</p>
       </div>
     </div>
 
@@ -942,16 +942,32 @@
     // Draw the default preview (3x3 pocket hint) on first load.
     updatePreview();
 
-    // Touch devices have no hover, so tap (or keyboard) toggles the binder open.
-    binderPreview.addEventListener('click', function () {
-      binderPreview.classList.toggle('open');
-    });
-    binderPreview.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
+    // Desktop (real hover): hover opens it; click/keyboard can pin it open.
+    // Touch devices: opening is scroll-driven — the binder opens as you
+    // start scrolling down the page and closes again back at the top.
+    var isTouch = window.matchMedia('(hover: none)').matches;
+    var hint = document.getElementById('previewHint');
+
+    if (isTouch) {
+      hint.textContent = 'Scroll down to open the binder';
+      var updateScrollOpen = function () {
+        // Hysteresis so it doesn't flicker around the threshold.
+        if (window.scrollY > 90) binderPreview.classList.add('open');
+        else if (window.scrollY < 40) binderPreview.classList.remove('open');
+      };
+      window.addEventListener('scroll', updateScrollOpen, { passive: true });
+      updateScrollOpen();
+    } else {
+      binderPreview.addEventListener('click', function () {
         binderPreview.classList.toggle('open');
-      }
-    });
+      });
+      binderPreview.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          binderPreview.classList.toggle('open');
+        }
+      });
+    }
 
     function showResult(type, message, big) {
       result.className = 'result ' + type;
