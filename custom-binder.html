@@ -117,7 +117,6 @@
       transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
       cursor: pointer;
     }
-    .binder:hover,
     .binder.open { transform: translateX(0) rotateX(14deg); }
 
     /* A page holds the card pockets (dark plastic, like the reference) */
@@ -133,7 +132,6 @@
       left: 50%; border-radius: 3px 7px 7px 3px;
       opacity: 0; transition: opacity 0.3s ease 0.15s;
     }
-    .binder:hover .page-right,
     .binder.open .page-right { opacity: 1; }
     .pockets { display: grid; gap: 6px; height: 100%; grid-template-columns: repeat(3, 1fr); }
     .pocket {
@@ -158,7 +156,6 @@
       border-radius: 3px; z-index: 2;
       opacity: 0; transition: opacity 0.5s ease;
     }
-    .binder:hover .binder-gutter,
     .binder.open .binder-gutter { opacity: 1; }
 
     /* The cover leaf: hinged at the gutter (its right edge) */
@@ -171,26 +168,39 @@
       transition: transform 0.7s cubic-bezier(0.4,0.15,0.2,1);
       z-index: 3;
     }
-    .binder:hover .binder-leaf,
     .binder.open .binder-leaf { transform: translateZ(0) rotateY(0deg); }  /* open: flat as left page */
 
+    /* Hover-to-open only where hover is a real, un-sticky state (mouse).
+       Touch devices latch :hover after a tap, which left the binder stuck
+       open on phones — they use the tap/keyboard toggle instead. */
+    @media (hover: hover) {
+      .binder:hover { transform: translateX(0) rotateX(14deg); }
+      .binder:hover .page-right { opacity: 1; }
+      .binder:hover .binder-gutter { opacity: 1; }
+      .binder:hover .binder-leaf { transform: translateZ(0) rotateY(0deg); }
+    }
+
+    /* The two faces get a hair of translateZ so they never share the same
+       3D plane — coplanar faces z-fight in some browsers, letting the
+       pocket page bleed through the cover. */
     .leaf-face {
       position: absolute; inset: 0;
       backface-visibility: hidden;
-      overflow: hidden;
+      -webkit-backface-visibility: hidden;
     }
     /* Front of the cover — smooth matte PU-leather in the chosen colour,
        top-down product view (seen when closed). The leaf's own 180° flip
        cancels this face's rotateY(180deg), so it renders UNMIRRORED:
        CSS-left is the visual left, where the spine/binding sits. */
     .cover-front {
-      transform: rotateY(180deg);
+      transform: rotateY(180deg) translateZ(0.8px);
       /* tighter corners on the spine (left), rounder on the opening edge */
       border-radius: 6px 12px 12px 6px;
       background:
         /* barely-there diagonal PU grain */
         repeating-linear-gradient(45deg, rgba(0,0,0,0.025) 0 1px, transparent 1px 5px),
-        var(--cover, linear-gradient(140deg, #3a3f47, #23262c));
+        /* default colour before a swatch is picked: teal, not black */
+        var(--cover, linear-gradient(170deg, #20a9a0, #109990));
       /* hairline dark edge + soft drop shadow */
       box-shadow: 0 0 0 1.5px rgba(12,12,14,0.8), 0 14px 26px rgba(0,0,0,0.38);
     }
@@ -222,6 +232,7 @@
     }
     /* Inside-left page (back of the leaf, seen when open) */
     .page-left {
+      transform: translateZ(0.8px);
       border-radius: 7px 3px 3px 7px;
       padding: 11px 17px;
       background: linear-gradient(150deg, #34353b, #1e1f23);
