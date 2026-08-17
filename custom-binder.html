@@ -102,102 +102,103 @@
       perspective: 1500px;
       animation: fadeUp 0.5s 0.32s ease both;
     }
+    /* Stage is two pages wide; the gutter sits at its horizontal centre.
+       Closed, the cover leaf is folded over the right page (shifted to
+       centre it). Open, the leaf lies flat as the left page — a two-page
+       spread, like a real zip-up card binder laid open. */
     .binder {
       position: relative;
-      width: 210px;
-      height: 264px;
+      width: 300px;
+      height: 196px;
+      margin: 12px 0 4px;
       transform-style: preserve-3d;
-      transform: rotateX(6deg) rotateY(-14deg);
-      transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+      transform: translateX(-75px) rotateX(12deg) rotateY(-13deg);
+      transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
       cursor: pointer;
     }
-    .binder:hover { transform: rotateX(4deg) rotateY(-6deg); }
+    .binder:hover,
+    .binder.open { transform: translateX(0) rotateX(18deg) rotateY(0deg); }
 
-    /* Back board of the binder */
-    .binder-base {
-      position: absolute; inset: 0;
-      border-radius: 6px 12px 12px 6px;
-      background: linear-gradient(120deg, #6a5844, #4c3d2c);
-      box-shadow: 0 18px 36px rgba(0,0,0,0.45);
+    /* A page holds the card pockets (dark plastic, like the reference) */
+    .page {
+      position: absolute; top: 0; width: 150px; height: 100%;
+      padding: 12px;
+      background: linear-gradient(150deg, #34353b, #1e1f23);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), 0 14px 26px rgba(0,0,0,0.4);
     }
-    /* Inside pages that hold the card pockets */
-    .binder-pages {
-      position: absolute;
-      left: 15px; right: 7px; top: 7px; bottom: 7px;
-      border-radius: 3px 8px 8px 3px;
-      background: linear-gradient(120deg, #fffdf6, #efe6d3);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), inset 4px 0 10px rgba(0,0,0,0.12);
-      display: grid;
-      gap: 9px;
-      padding: 18px 16px;
-      grid-template-columns: repeat(3, 1fr);
-    }
+    .page-right { left: 50%; border-radius: 3px 7px 7px 3px; }
+    .pockets { display: grid; gap: 6px; height: 100%; grid-template-columns: repeat(3, 1fr); }
     .pocket {
-      border-radius: 3px;
-      background: linear-gradient(160deg, rgba(120,170,210,0.30), rgba(120,170,210,0.10));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.65), 0 1px 2px rgba(0,0,0,0.12);
-    }
-    /* Bound (sewn) spine — these are zip binders, NOT three-ring */
-    .binder-spine {
-      position: absolute; left: 13px; top: 10px; bottom: 10px; width: 10px;
       border-radius: 2px;
-      background: linear-gradient(90deg, rgba(0,0,0,0.24), rgba(0,0,0,0.04));
-      box-shadow: 1px 0 2px rgba(0,0,0,0.15);
-      transform: translateZ(2px);
+      background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 2px 5px rgba(255,255,255,0.05);
+    }
+    /* Zipper trim running around each panel's edge */
+    .page-right::before,
+    .page-left::before,
+    .cover-front::before {
+      content: ''; position: absolute; inset: 4px;
+      border-radius: 3px;
+      border: 2px dotted rgba(0,0,0,0.5);
+      pointer-events: none; z-index: 1;
+    }
+
+    /* Centre binding shadow between the two open pages */
+    .binder-gutter {
+      position: absolute; top: 6px; bottom: 6px; left: 50%; width: 12px;
+      transform: translateX(-50%) translateZ(1px);
+      background: linear-gradient(90deg, rgba(0,0,0,0.4), rgba(0,0,0,0.05), rgba(0,0,0,0.4));
+      border-radius: 3px; z-index: 2;
+      opacity: 0; transition: opacity 0.5s ease;
+    }
+    .binder:hover .binder-gutter,
+    .binder.open .binder-gutter { opacity: 1; }
+
+    /* The cover leaf: hinged at the gutter (its right edge) */
+    .binder-leaf {
+      position: absolute; top: 0; right: 50%; width: 150px; height: 100%;
+      transform-origin: right center;
+      transform-style: preserve-3d;
+      transform: rotateY(180deg);       /* closed: folded over the right page */
+      transition: transform 0.7s cubic-bezier(0.4,0.15,0.2,1);
       z-index: 3;
     }
-    /* stitching down the binding */
-    .binder-spine::after {
-      content: ''; position: absolute; left: 3px; top: 4px; bottom: 4px; width: 2px;
-      border-radius: 2px;
-      background: repeating-linear-gradient(to bottom,
-        rgba(255,255,255,0.55) 0 5px, transparent 5px 12px);
-    }
+    .binder:hover .binder-leaf,
+    .binder.open .binder-leaf { transform: rotateY(0deg); }  /* open: flat as left page */
 
-    /* The cover that swings open on hover / tap */
-    .binder-cover {
+    .leaf-face {
       position: absolute; inset: 0;
-      transform-origin: left center;
-      transform-style: preserve-3d;
-      transform: translateZ(5px);
-      transition: transform 0.7s cubic-bezier(0.4,0.15,0.2,1);
-      z-index: 4;
-    }
-    .binder:hover .binder-cover,
-    .binder.open .binder-cover { transform: translateZ(5px) rotateY(-158deg); }
-
-    .cover-face {
-      position: absolute; inset: 0;
-      border-radius: 6px 12px 12px 6px;
       backface-visibility: hidden;
       overflow: hidden;
     }
-    /* Front of the cover — takes the chosen binder color */
+    /* Front of the cover — the chosen colour (seen when closed) */
     .cover-front {
+      transform: rotateY(180deg);
+      border-radius: 7px 3px 3px 7px;
       background: var(--cover, linear-gradient(135deg, #3a3f47, #23262c));
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.08), 0 6px 16px rgba(0,0,0,0.3);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.18), 0 14px 26px rgba(0,0,0,0.4);
     }
-    /* Toploader "zip" stitch line around the edge */
-    .cover-front::before {
-      content: ''; position: absolute; inset: 9px;
-      border-radius: 4px 9px 9px 4px;
-      border: 2px dashed rgba(255,255,255,0.32);
-    }
-    /* Soft sheen across the cover */
-    .cover-front::after {
+    .cover-front::after {   /* sheen */
       content: ''; position: absolute; inset: 0;
-      background: linear-gradient(115deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 42%);
+      background: linear-gradient(115deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 45%);
     }
-    /* Zipper pull tab — signals a zip-up card binder */
+    /* Inside-left page (back of the leaf, seen when open) */
+    .page-left {
+      border-radius: 7px 3px 3px 7px;
+      padding: 12px;
+      background: linear-gradient(150deg, #34353b, #1e1f23);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+    /* Zipper pull tab on the cover */
     .zipper-pull {
-      position: absolute; top: 12px; right: 14px; z-index: 2;
-      width: 15px; height: 9px; border-radius: 3px;
+      position: absolute; top: 11px; right: 13px; z-index: 3;
+      width: 14px; height: 8px; border-radius: 3px;
       background: linear-gradient(#efefef, #9a9a9a);
       box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
     }
     .zipper-pull::after {
-      content: ''; position: absolute; top: 8px; left: 5px;
-      width: 5px; height: 9px;
+      content: ''; position: absolute; top: 7px; left: 5px;
+      width: 5px; height: 8px;
       border: 1.5px solid #9a9a9a; border-top: none; border-radius: 0 0 3px 3px;
     }
     .cover-label {
@@ -211,19 +212,6 @@
       background: rgba(0,0,0,0.16);
       border: 1.5px solid rgba(255,255,255,0.38);
       z-index: 2;
-    }
-    /* Inside of the cover (seen when open) */
-    .cover-back {
-      transform: rotateY(180deg);
-      background: linear-gradient(120deg, #efe7d6, #d9cdb6);
-      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05);
-    }
-    .cover-back::after {
-      content: 'Toploader Sleeve';
-      position: absolute; left: 50%; top: 50%;
-      transform: translate(-50%, -50%) rotateY(180deg);
-      font-family: 'Bangers', cursive; font-size: 0.7rem; letter-spacing: 0.5px;
-      color: rgba(90,66,20,0.5);
     }
     .preview-caption {
       margin-top: 14px;
@@ -555,15 +543,14 @@
       <div>
         <div class="binder" id="binderPreview" role="button" tabindex="0"
              aria-label="Binder preview — hover or tap to open it">
-          <div class="binder-base"></div>
-          <div class="binder-pages" id="binderArt"></div>
-          <div class="binder-spine"></div>
-          <div class="binder-cover">
-            <div class="cover-face cover-front">
+          <div class="page page-right"><div class="pockets" id="binderArt"></div></div>
+          <div class="binder-gutter"></div>
+          <div class="binder-leaf">
+            <div class="leaf-face cover-front">
               <span class="zipper-pull"></span>
               <span class="cover-label">&#9733; Custom<br/>Binder</span>
             </div>
-            <div class="cover-face cover-back"></div>
+            <div class="leaf-face page-left"><div class="pockets" id="binderArtLeft"></div></div>
           </div>
         </div>
         <p class="preview-caption" id="previewCaption">Live Color Preview</p>
@@ -786,19 +773,24 @@
       updateSummary();
     }
 
-    // Draw the card-pocket grid on the cover to match the chosen page size
-    // (4 = 2x2, 9 = 3x3). Defaults to a 3x3 hint before a size is picked.
+    // Fill both open pages with a card-pocket grid matching the chosen page
+    // size (4 = 2x2, 9 = 3x3). Defaults to 3x3 before a size is picked.
+    const binderArtLeft = document.getElementById('binderArtLeft');
+    function fillPockets(el, perPage, cols) {
+      el.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+      el.innerHTML = '';
+      for (let i = 0; i < perPage; i++) {
+        const p = document.createElement('span');
+        p.className = 'pocket';
+        el.appendChild(p);
+      }
+    }
     function renderBinderLayout() {
       const sizeEl = form.querySelector('input[name="binder_size"]:checked');
       const perPage = sizeEl && sizeEl.value.indexOf('4') === 0 ? 4 : 9;
       const cols = perPage === 4 ? 2 : 3;
-      binderArt.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
-      binderArt.innerHTML = '';
-      for (let i = 0; i < perPage; i++) {
-        const p = document.createElement('span');
-        p.className = 'pocket';
-        binderArt.appendChild(p);
-      }
+      fillPockets(binderArt, perPage, cols);
+      fillPockets(binderArtLeft, perPage, cols);
     }
 
     function updateSummary() {
