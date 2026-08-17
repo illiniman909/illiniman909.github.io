@@ -448,6 +448,15 @@
       color: #fff;
       box-shadow: 0 3px 0 rgba(0,0,0,0.18);
     }
+    /* price under a size option; filled in once a binder type is chosen */
+    .opt-price {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      opacity: 0.9;
+    }
+    .opt-price:empty { display: none; }
 
     /* color swatch picker */
     .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -645,15 +654,16 @@
             <label>Binder Size <span class="req">*</span></label>
             <div class="segmented">
               <input type="radio" id="size_4" name="binder_size" value="4 cards per page" required />
-              <label for="size_4">4 cards per page</label>
+              <label for="size_4">4 cards per page<span class="opt-price" id="price_4"></span></label>
               <input type="radio" id="size_9" name="binder_size" value="9 cards per page" />
-              <label for="size_9">9 cards per page</label>
+              <label for="size_9">9 cards per page<span class="opt-price" id="price_9"></span></label>
             </div>
           </div>
 
           <!-- Brand is implied by the binder type (Toploader = Morabto,
                Non-Toploader = Vault X) and stored here for the email. -->
           <input type="hidden" name="binder_brand" id="binder_brand" />
+          <input type="hidden" name="binder_price" id="binder_price" />
 
           <div class="field">
             <label>Binder Color <span class="req">*</span></label>
@@ -713,11 +723,12 @@
             <div class="row"><span>Binder</span><strong id="sum_type">&mdash;</strong></div>
             <div class="row"><span>Layout</span><strong id="sum_size">&mdash;</strong></div>
             <div class="row"><span>Color</span><strong id="sum_color">&mdash;</strong></div>
+            <div class="row"><span>Price</span><strong id="sum_price">&mdash;</strong></div>
             <div class="row"><span>Back image</span><strong id="sum_back">No</strong></div>
           </div>
 
           <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
-          <p class="reassure">&#128274; No payment now &bull; We&rsquo;ll confirm price &amp; details by email</p>
+          <p class="reassure">&#128274; No payment due yet &mdash; we&rsquo;ll confirm your order by email, then a 50% deposit starts production</p>
           <div class="result" id="result"></div>
         </div>
       </div>
@@ -828,6 +839,14 @@
       fillPockets(binderArtLeft, perPage, cols);
     }
 
+    // Binder prices by type + page size.
+    const PRICES = {
+      'Toploader': { '4 cards per page': 40, '9 cards per page': 60 },
+      'Vault X':   { '4 cards per page': 50, '9 cards per page': 75 }
+    };
+    const sumPrice = document.getElementById('sum_price');
+    const priceInput = document.getElementById('binder_price');
+
     function updateSummary() {
       const typeEl = form.querySelector('input[name="binder_type"]:checked');
       const sizeEl = form.querySelector('input[name="binder_size"]:checked');
@@ -836,6 +855,15 @@
       sumColor.textContent = colorInput.value || '—';
       const back = document.getElementById('back_image');
       sumBack.textContent = (back.files && back.files.length) ? 'Yes (extra charge)' : 'No';
+
+      // Show each size's price once a binder type is chosen, and total the
+      // selected combo in the summary (also sent along with the request).
+      const brandPrices = typeEl ? PRICES[typeEl.dataset.brand] : null;
+      document.getElementById('price_4').textContent = brandPrices ? '$' + brandPrices['4 cards per page'] : '';
+      document.getElementById('price_9').textContent = brandPrices ? '$' + brandPrices['9 cards per page'] : '';
+      const price = (brandPrices && sizeEl) ? brandPrices[sizeEl.value] : null;
+      sumPrice.textContent = price ? '$' + price : '—';
+      priceInput.value = price ? '$' + price : '';
     }
 
     function renderSwatches() {
@@ -949,7 +977,7 @@
     var hint = document.getElementById('previewHint');
 
     if (isTouch) {
-      hint.textContent = 'Scroll down to open the binder';
+      hint.style.display = 'none';
       var updateScrollOpen = function () {
         // Hysteresis so it doesn't flicker around the threshold.
         if (window.scrollY > 90) binderPreview.classList.add('open');
