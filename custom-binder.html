@@ -19,6 +19,9 @@
       --go-dk: #009e36;
     }
 
+    /* Fallback tone behind the texture (shows only if the image fails). */
+    html { background: #6b4a2a; }
+
     body {
       min-height: 100vh;
       display: flex;
@@ -29,22 +32,21 @@
       font-family: 'Nunito', sans-serif;
       position: relative;
       overflow-x: hidden;
-
-      background-image: url('cardboard.jpg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
     }
 
-    /* Subtle dark overlay for readability */
+    /* Cardboard texture + readability tint painted on a single FIXED layer.
+       Using a fixed positioned element (instead of background-attachment:
+       fixed) renders reliably on iOS Safari, so the texture stays put and
+       persists behind the whole form as you scroll. */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
+      z-index: -1;
       pointer-events: none;
-      z-index: 0;
-      background: rgba(80, 45, 5, 0.18);
+      background:
+        linear-gradient(rgba(80, 45, 5, 0.18), rgba(80, 45, 5, 0.18)),
+        url('cardboard.jpg') center center / cover no-repeat;
     }
 
     .container {
