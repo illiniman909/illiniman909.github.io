@@ -108,6 +108,48 @@
     .btn-events  { background: linear-gradient(135deg, #b14ad6 0%, #7d2fae 100%); animation-delay: 0.45s; }
     .btn-contact { background: linear-gradient(135deg, #4a3413 0%, #2a1a00 100%); animation-delay: 0.85s; }
 
+    /* ===== Cyan sweep ring around the custom-binder tile =====
+       The wrapper carries the tile's drop shadow and hover lift, because
+       overflow:hidden (needed to clip the spinning gradient to the rounded
+       shape) would otherwise clip the button's own shadow. */
+    .sweep {
+      position: relative;
+      border-radius: 16px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      animation: fadeUp 0.4s 0.35s ease both;
+    }
+    .sweep::before {
+      content: '';
+      position: absolute; left: 50%; top: 50%;
+      width: 210%; aspect-ratio: 1;
+      translate: -50% -50%;
+      z-index: 0;
+      background: conic-gradient(from 0deg,
+        rgba(60,220,255,0) 0deg, rgba(60,220,255,0) 200deg,
+        #3cdcff 290deg, #d6f8ff 325deg, #3cdcff 345deg, rgba(60,220,255,0) 360deg);
+      animation: spin 3.2s linear infinite;
+      pointer-events: none;
+    }
+    /* The button must be positioned and stacked above the gradient, or the
+       spinning pseudo-element paints over it and eats the clicks. */
+    .sweep > .link-btn {
+      position: relative;
+      z-index: 1;
+      border-radius: 13px;
+      box-shadow: none;
+      animation: none;
+    }
+    .sweep > .link-btn:hover,
+    .sweep > .link-btn:active { transform: none; box-shadow: none; }
+    .sweep:hover { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(0,0,0,0.28), 0 14px 28px rgba(0,0,0,0.22); }
+    .sweep:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.28); }
+
+    @keyframes spin { to { rotate: 360deg; } }
+    @media (prefers-reduced-motion: reduce) { .sweep::before { animation: none; } }
+
     .tagline {
       font-family: 'Nunito', sans-serif;
       font-size: 0.78rem;
@@ -134,10 +176,12 @@
 
     <div class="links">
 
-      <a class="link-btn btn-binder" href="custom-binder.html">
-        <img class="btn-logo" src="https://cdn.simpleicons.org/bookstack/white" alt="Custom Binder" />
-        Request a Custom Binder
-      </a>
+      <div class="sweep">
+        <a class="link-btn btn-binder" href="custom-binder.html">
+          <img class="btn-logo" src="https://cdn.simpleicons.org/bookstack/white" alt="Custom Binder" />
+          Request a Custom Binder
+        </a>
+      </div>
 
       <a class="link-btn btn-events" href="events.html">
         <img class="btn-logo" src="https://cdn.simpleicons.org/googlecalendar/white" alt="Events" />
