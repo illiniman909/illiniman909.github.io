@@ -28,7 +28,7 @@
  */
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const allowedOrigin = env.ALLOWED_ORIGIN || 'https://krustykardboard.com';
     const cors = {
       'Access-Control-Allow-Origin': allowedOrigin,
@@ -77,9 +77,9 @@ export default {
       if (env.RESEND_API_KEY) {
         try {
           await sendShopEmail(fields, frontFile, back, env);
-          try {
-            await sendCustomerConfirmation(fields, env);
-          } catch (_) { /* confirmation is best-effort */ }
+          // The confirmation is best-effort and the customer should not wait
+          // on it: hand it to the runtime and respond immediately.
+          deferred(ctx, sendCustomerConfirmation(fields, env));
           return json({ success: true, message: 'OK' }, 200, cors);
         } catch (err) {
           // Fall back to the legacy path if it is configured; otherwise report.
@@ -112,7 +112,7 @@ export default {
         data.message = 'Form service: ' + data.message;
       }
       if (data.success && env.RESEND_API_KEY) {
-        try { await sendCustomerConfirmation(fields, env); } catch (_) {}
+        deferred(ctx, sendCustomerConfirmation(fields, env));
       }
       return json(data, res.status, cors);
     } catch (err) {
@@ -120,6 +120,12 @@ export default {
     }
   },
 };
+
+/** Run a best-effort task after the response is sent, if the runtime allows. */
+function deferred(ctx, promise) {
+  const p = Promise.resolve(promise).catch(() => {});
+  if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(p);
+}
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -218,11 +224,13 @@ function shopEmailHtml(f) {
       detailRow('Layout', f.binder_size) +
       detailRow('Color', f.binder_color) +
       detailRow('Price', f.binder_price) +
-      detailRow('Back image', f.has_back ? 'Yes (attached)' : 'No') +
+      detailRow('Front image', f.front_name || 'attached') +
+      detailRow('Back image', f.has_back ? (f.back_name || 'attached') : 'No') +
       detailRow('Notes', f.notes)
     ) +
-    '<p style="margin:0;color:' + BRAND.inkSoft + ';">The customer&rsquo;s artwork is attached. ' +
-    'Hitting reply goes straight to the customer.</p>'
+    '<p style="margin:0;color:' + BRAND.inkSoft + ';">Artwork is attached, named ' +
+    '<strong>FRONT-</strong> and <strong>BACK-</strong>. Hitting reply goes ' +
+    'straight to the customer.</p>'
   );
 }
 
@@ -253,15 +261,19 @@ async function sendShopEmail(f, frontFile, backFile, env) {
     throw new Error('Images are too large — please use images under 15MB each.');
   }
 
+  // Prefix the filenames so the attachments are self-labelling — otherwise
+  // two camera-roll names like IMG_1234.jpg are indistinguishable.
+  const frontName = 'FRONT-' + (frontFile.name || 'image.jpg');
+  const backName = backFile ? 'BACK-' + (backFile.name || 'image.jpg') : '';
+  f.front_name = frontName;
+  f.back_name = backName;
+
   const attachments = [{
-    filename: frontFile.name || 'front-image',
+    filename: frontName,
     content: await fileToBase64(frontFile),
   }];
   if (backFile) {
-    attachments.push({
-      filename: backFile.name || 'back-image',
-      content: await fileToBase64(backFile),
-    });
+    attachments.push({ filename: backName, content: await fileToBase64(backFile) });
   }
 
   await resendSend(env, {
