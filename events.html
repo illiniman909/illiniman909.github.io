@@ -50,8 +50,12 @@
       width: 70%;
       max-width: 300px;
       filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
-      animation: popIn 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) both;
     }
+
+    /* Logo doubles as a home link. Block + full width so the logo's
+       percentage width still resolves against the container. */
+    .logo-link { display: block; width: 100%; text-align: center; }
+    .logo-link:hover .logo { filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)) brightness(1.06); }
 
     .heading {
       font-family: 'Bangers', cursive;
@@ -153,10 +157,6 @@
     }
     .back-link:hover { opacity: 1; text-decoration: underline; }
 
-    @keyframes popIn {
-      from { transform: scale(0.75) rotate(-2deg); opacity: 0; }
-      to   { transform: scale(1) rotate(0deg);     opacity: 1; }
-    }
     @keyframes fadeUp {
       from { transform: translateY(18px); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }
@@ -166,7 +166,7 @@
 <body>
   <div class="container">
 
-    <img class="logo" src="logo.png" alt="Krusty Kardboard TCG" />
+    <a class="logo-link" href="index.html" aria-label="Back to Home"><img class="logo" src="logo.png" alt="Krusty Kardboard TCG" /></a>
     <h1 class="heading">Scheduled Events</h1>
     <div class="divider"></div>
 
@@ -189,22 +189,44 @@
        =================================================================== */
     const EVENTS = [
       {
-        name: 'Nexus Con',
-        date: 'June 20, 2026',
-        location: '1 McCamly Square, McCamly St S, Battle Creek, MI 49017',
-        link: 'https://oozingcollectibles.com'
+        name: 'TCG Card Expo — MSA Woodland',
+        date: 'Saturday, September 12, 2026',
+        location: '2100 28th St SE, Grand Rapids, MI 49508',
+        link: 'https://tcgcardsexpo.com/'
       },
       {
         name: 'Legends Card Show',
-        date: 'July 18, 2026',
+        date: 'Saturday, September 19, 2026',
         location: '3661 28th St SE, Grand Rapids, MI 49512',
         link: 'https://legendsfanshop.com/pages/card-shows'
       },
       {
-        name: 'Grand Rapids TCG Con',
-        date: 'August 14–16, 2026',
-        location: 'Grand Rapids, MI — Venue TBD',
-        link: 'https://cardsandmoretour.com/event/grand-rapids-tcg-con/'
+        name: 'TCG Card Expo — MSA Woodland',
+        date: 'Saturday, October 10, 2026',
+        location: '2100 28th St SE, Grand Rapids, MI 49508',
+        link: 'https://tcgcardsexpo.com/'
+      },
+      {
+        name: 'Legends Card Show',
+        date: 'Saturday, October 17, 2026',
+        location: '3661 28th St SE, Grand Rapids, MI 49512',
+        link: 'https://legendsfanshop.com/pages/card-shows'
+      },
+      {
+        name: 'Lakeview Square Mall',
+        date: 'Saturday, October 24, 2026',
+        location: '577 Beckley Rd, Battle Creek, MI 49015'
+      },
+      {
+        name: 'The Lakes Mall',
+        date: 'Saturday, November 7, 2026',
+        location: '5600 Harvey St #1044, Muskegon, MI 49444'
+      },
+      {
+        name: 'TCG Card Expo — MSA Woodland',
+        date: 'Saturday, November 14, 2026',
+        location: '2100 28th St SE, Grand Rapids, MI 49508',
+        link: 'https://tcgcardsexpo.com/'
       },
     ];
 
