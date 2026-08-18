@@ -50,7 +50,6 @@
       width: 70%;
       max-width: 300px;
       filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
-      animation: popIn 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) both;
     }
 
     .heading {
@@ -153,10 +152,6 @@
     }
     .back-link:hover { opacity: 1; text-decoration: underline; }
 
-    @keyframes popIn {
-      from { transform: scale(0.75) rotate(-2deg); opacity: 0; }
-      to   { transform: scale(1) rotate(0deg);     opacity: 1; }
-    }
     @keyframes fadeUp {
       from { transform: translateY(18px); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }

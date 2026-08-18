@@ -64,7 +64,6 @@
       width: 62%;
       max-width: 280px;
       filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
-      animation: popIn 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) both;
     }
 
     .heading {
@@ -545,6 +544,72 @@
     .result.error   { display: block; background: #fdecea; color: #b3261e; border: 2px solid #f1a9a4; }
     .result .big { display: block; font-family: 'Bangers', cursive; font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 4px; }
 
+    /* ============ SUCCESS SCREEN (replaces the form once sent) ============ */
+    .success-panel {
+      display: none;
+      width: 100%;
+      background: rgba(255, 250, 242, 0.97);
+      border-radius: 20px;
+      padding: 34px 26px 30px;
+      text-align: center;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.10), 0 18px 40px rgba(0,0,0,0.28);
+      animation: fadeUp 0.45s ease both;
+    }
+    .success-panel.show { display: block; }
+    .success-check {
+      width: 68px; height: 68px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--go) 0%, var(--go-dk) 100%);
+      box-shadow: 0 4px 0 rgba(0,0,0,0.18), 0 8px 22px rgba(0,0,0,0.18);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .success-title {
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+      letter-spacing: 1px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .success-text {
+      font-weight: 700;
+      font-size: 0.98rem;
+      line-height: 1.55;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+    .success-note {
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: #8a6a3a;
+      background: #fff6e9;
+      border: 1.5px solid #f0d6a8;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 16px 0 22px;
+    }
+    .success-actions { display: flex; flex-direction: column; gap: 12px; }
+    .sp-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.22), 0 8px 20px rgba(0,0,0,0.16);
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .sp-btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
+    .sp-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.22); }
+    .sp-another { background: linear-gradient(135deg, var(--brand-orange) 0%, var(--brand-orange-dk) 100%); }
+    .sp-home    { background: linear-gradient(135deg, #4a3413 0%, #2a1a00 100%); }
+
     .back-link {
       margin-top: 6px;
       font-weight: 900;
@@ -558,10 +623,6 @@
     }
     .back-link:hover { opacity: 1; text-decoration: underline; }
 
-    @keyframes popIn {
-      from { transform: scale(0.75) rotate(-2deg); opacity: 0; }
-      to   { transform: scale(1) rotate(0deg);     opacity: 1; }
-    }
     @keyframes fadeUp {
       from { transform: translateY(18px); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }
@@ -735,7 +796,27 @@
 
     </form>
 
-    <a class="back-link" href="index.html">&larr; Back to Home</a>
+    <!-- Shown in place of the form once a request is sent -->
+    <div class="success-panel" id="successPanel">
+      <div class="success-check">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <h2 class="success-title">Request Sent!</h2>
+      <p class="success-text">
+        Thanks! We&rsquo;ve got your custom binder request and sent a confirmation
+        to your email. We&rsquo;re reviewing it now and will reach out soon.
+      </p>
+      <p class="success-note">
+        &#128274; No payment due yet &mdash; we&rsquo;ll confirm your order by email,
+        then a 50% deposit starts production
+      </p>
+      <div class="success-actions">
+        <button type="button" class="sp-btn sp-another" id="anotherBtn">Submit Another Request</button>
+        <a class="sp-btn sp-home" href="index.html">Back to Home</a>
+      </div>
+    </div>
+
+    <a class="back-link" href="index.html" id="backLink">&larr; Back to Home</a>
 
   </div>
 
@@ -997,6 +1078,52 @@
       });
     }
 
+    /* ---- Success screen: replaces the form once a request is sent ---- */
+    const successPanel = document.getElementById('successPanel');
+    const previewWrap = document.querySelector('.preview-wrap');
+    const subheading = document.querySelector('.subheading');
+    const backLink = document.getElementById('backLink');
+
+    // Clear every field and the derived UI back to a blank form.
+    function resetForm() {
+      form.reset();
+      renderSwatches();
+      ['front', 'back'].forEach(function (which) {
+        document.getElementById('dz_' + which).classList.remove('has-file');
+        const t = document.getElementById('thumb_' + which);
+        t.style.backgroundImage = '';
+        t.innerHTML = '&#128247;';
+        document.getElementById('sub_' + which).textContent =
+          which === 'front' ? 'or tap to browse • PNG / JPG' : 'or tap to browse';
+      });
+      result.className = 'result';
+      result.innerHTML = '';
+      updateSummary();
+    }
+
+    function showSuccessScreen() {
+      form.style.display = 'none';
+      if (previewWrap) previewWrap.style.display = 'none';
+      if (subheading) subheading.style.display = 'none';
+      if (backLink) backLink.style.display = 'none';
+      successPanel.classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showFormAgain() {
+      successPanel.classList.remove('show');
+      form.style.display = '';
+      if (previewWrap) previewWrap.style.display = '';
+      if (subheading) subheading.style.display = '';
+      if (backLink) backLink.style.display = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('anotherBtn').addEventListener('click', function () {
+      resetForm();          // already reset on send; guards against stale state
+      showFormAgain();
+    });
+
     function showResult(type, message, big) {
       result.className = 'result ' + type;
       result.innerHTML = (big ? '<span class="big">' + big + '</span>' : '') + message;
@@ -1027,18 +1154,8 @@
         const data = await response.json();
 
         if (data.success) {
-          showResult('success', 'Your custom binder request has been sent. We&rsquo;ll be in touch soon.', 'Thanks!');
-          form.reset();
-          renderSwatches();
-          ['front', 'back'].forEach(function (which) {
-            document.getElementById('dz_' + which).classList.remove('has-file');
-            const t = document.getElementById('thumb_' + which);
-            t.style.backgroundImage = '';
-            t.innerHTML = '&#128247;';
-            document.getElementById('sub_' + which).textContent =
-              which === 'front' ? 'or tap to browse • PNG / JPG' : 'or tap to browse';
-          });
-          updateSummary();
+          resetForm();
+          showSuccessScreen();
         } else {
           showResult('error', data.message || 'Something went wrong. Please try again.');
         }
