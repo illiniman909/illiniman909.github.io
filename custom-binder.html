@@ -1152,11 +1152,29 @@
         // Send everything (text + image files) to the Worker, which uploads
         // the images and emails the request using its secret keys.
         const formData = new FormData(form);
-        const response = await fetch(WORKER_URL, {
-          method: 'POST',
-          body: formData
+        // XHR (not fetch) so we can report upload progress — the photo upload
+        // is most of the wait, and a moving number reads far better than a
+        // frozen "Sending…".
+        const data = await new Promise(function (resolve, reject) {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', WORKER_URL);
+          xhr.upload.addEventListener('progress', function (e) {
+            if (!e.lengthComputable) return;
+            const pct = Math.round((e.loaded / e.total) * 100);
+            submitBtn.textContent = pct < 100 ? 'Uploading ' + pct + '%' : 'Sending…';
+          });
+          xhr.addEventListener('load', function () {
+            try { resolve(JSON.parse(xhr.responseText)); }
+            catch (_) { reject(new Error('Unexpected response from the server.')); }
+          });
+          xhr.addEventListener('error', function () {
+            reject(new Error('Network error. Please check your connection and try again.'));
+          });
+          xhr.addEventListener('timeout', function () {
+            reject(new Error('The request timed out. Please try again.'));
+          });
+          xhr.send(formData);
         });
-        const data = await response.json();
 
         if (data.success) {
           resetForm();
