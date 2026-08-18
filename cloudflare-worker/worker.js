@@ -155,7 +155,7 @@ const detailBox = (rows) =>
   'border-radius:12px;margin:16px 0;font-size:14px;">' + rows + '</table>';
 
 /** Wraps email content in the site look: logo, cream card on tan, tagline. */
-export function emailShell(content) {
+function emailShell(content) {
   return '<!DOCTYPE html><html><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<style>@import url("https://fonts.googleapis.com/css2?family=Bangers&display=swap");</style>' +
@@ -184,7 +184,7 @@ export function emailShell(content) {
 }
 
 /** Customer confirmation body. */
-export function customerEmailHtml(f) {
+function customerEmailHtml(f) {
   return emailShell(
     '<h1 style="' + headingStyle + '">We Got Your Binder Request!</h1>' +
     '<p style="margin:0 0 12px;">Hi ' + esc(f.name || 'there') + ',</p>' +
@@ -206,7 +206,7 @@ export function customerEmailHtml(f) {
 }
 
 /** Shop order-notification body. */
-export function shopEmailHtml(f) {
+function shopEmailHtml(f) {
   return emailShell(
     '<h1 style="' + headingStyle + '">New Custom Binder Request</h1>' +
     detailBox(
