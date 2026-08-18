@@ -124,10 +124,107 @@ export default {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/* ---------- Branded email template (matches krustykardboard.com) ---------- */
+
+const BRAND = {
+  tan: '#cfa972',        // cardboard backdrop
+  paper: '#fffaf2',      // cream card
+  ink: '#2a1a00',
+  inkSoft: '#8a6a3a',
+  orange: '#c97f1a',
+  orangeDk: '#9c5e0d',
+  boxBg: '#fff6e9',
+  boxBorder: '#f0d6a8',
+  logo: 'https://krustykardboard.com/logo.png',
+};
+
+const headingStyle =
+  "font-family:'Bangers','Arial Black',Arial,sans-serif;font-weight:normal;" +
+  'letter-spacing:1px;color:' + BRAND.orangeDk + ';font-size:27px;margin:0 0 14px;';
+
 const detailRow = (label, value) => value
-  ? '<tr><td style="padding:6px 14px 6px 0;color:#8a6a3a;font-weight:bold;vertical-align:top;">' +
-    label + '</td><td style="padding:6px 0;color:#2a1a00;white-space:pre-wrap;">' + esc(value) + '</td></tr>'
+  ? '<tr><td style="padding:7px 14px 7px 12px;color:' + BRAND.inkSoft + ';font-weight:bold;' +
+    'vertical-align:top;white-space:nowrap;">' + label + '</td>' +
+    '<td style="padding:7px 12px 7px 0;color:' + BRAND.ink + ';white-space:pre-wrap;width:100%;">' +
+    esc(value) + '</td></tr>'
   : '';
+
+const detailBox = (rows) =>
+  '<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="' +
+  'background:' + BRAND.boxBg + ';border:2px solid ' + BRAND.boxBorder + ';' +
+  'border-radius:12px;margin:16px 0;font-size:14px;">' + rows + '</table>';
+
+/** Wraps email content in the site look: logo, cream card on tan, tagline. */
+export function emailShell(content) {
+  return '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<style>@import url("https://fonts.googleapis.com/css2?family=Bangers&display=swap");</style>' +
+    '</head>' +
+    '<body style="margin:0;padding:0;background:' + BRAND.tan + ';">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="' + BRAND.tan + '" ' +
+    'style="background:' + BRAND.tan + ';"><tr><td align="center" style="padding:30px 14px 34px;">' +
+    '<table role="presentation" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">' +
+    '<tr><td align="center" style="padding:0 0 18px;">' +
+    '<a href="https://krustykardboard.com" style="text-decoration:none;">' +
+    '<img src="' + BRAND.logo + '" width="210" alt="Krusty Kardboard TCG" ' +
+    'style="display:block;width:210px;max-width:72%;height:auto;border:0;"></a>' +
+    '</td></tr>' +
+    '<tr><td style="background:' + BRAND.paper + ';border-radius:18px;padding:28px 26px;' +
+    'font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:' + BRAND.ink + ';">' +
+    content +
+    '</td></tr>' +
+    '<tr><td align="center" style="padding:18px 0 0;font-family:Arial,Helvetica,sans-serif;' +
+    'font-size:11px;font-weight:bold;letter-spacing:2px;color:#5c3610;text-transform:uppercase;">' +
+    'Singles &bull; Slabs &bull; Sealed</td></tr>' +
+    '<tr><td align="center" style="padding:7px 0 0;">' +
+    '<a href="https://krustykardboard.com" style="font-family:Arial,Helvetica,sans-serif;' +
+    'font-size:12px;color:' + BRAND.orangeDk + ';font-weight:bold;">krustykardboard.com</a>' +
+    '</td></tr>' +
+    '</table></td></tr></table></body></html>';
+}
+
+/** Customer confirmation body. */
+export function customerEmailHtml(f) {
+  return emailShell(
+    '<h1 style="' + headingStyle + '">We Got Your Binder Request!</h1>' +
+    '<p style="margin:0 0 12px;">Hi ' + esc(f.name || 'there') + ',</p>' +
+    '<p style="margin:0 0 4px;">Thanks for your request &mdash; we&rsquo;re reviewing it now and ' +
+    'will reach out soon at this email address to confirm the details.</p>' +
+    detailBox(
+      detailRow('Binder', f.binder_type) +
+      detailRow('Layout', f.binder_size) +
+      detailRow('Color', f.binder_color) +
+      detailRow('Price', f.binder_price) +
+      detailRow('Back image', f.has_back ? 'Yes (extra charge)' : 'No') +
+      detailRow('Notes', f.notes)
+    ) +
+    '<p style="margin:0 0 12px;"><strong>No payment is due yet.</strong> Once we confirm your ' +
+    'order by email, a 50% deposit gets your build started.</p>' +
+    '<p style="margin:18px 0 0;color:' + BRAND.inkSoft + ';">&mdash; Your Local Card Guys<br>' +
+    'Krusty Kardboard TCG</p>'
+  );
+}
+
+/** Shop order-notification body. */
+export function shopEmailHtml(f) {
+  return emailShell(
+    '<h1 style="' + headingStyle + '">New Custom Binder Request</h1>' +
+    detailBox(
+      detailRow('Name', f.name) +
+      detailRow('Phone', f.phone) +
+      detailRow('Email', f.email) +
+      detailRow('Ship to', f.address) +
+      detailRow('Binder', f.binder_type) +
+      detailRow('Layout', f.binder_size) +
+      detailRow('Color', f.binder_color) +
+      detailRow('Price', f.binder_price) +
+      detailRow('Back image', f.has_back ? 'Yes (attached)' : 'No') +
+      detailRow('Notes', f.notes)
+    ) +
+    '<p style="margin:0;color:' + BRAND.inkSoft + ';">The customer&rsquo;s artwork is attached. ' +
+    'Hitting reply goes straight to the customer.</p>'
+  );
+}
 
 async function resendSend(env, message) {
   const res = await fetch('https://api.resend.com/emails', {
@@ -167,31 +264,12 @@ async function sendShopEmail(f, frontFile, backFile, env) {
     });
   }
 
-  const html =
-    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#2a1a00;">' +
-    '<h2 style="color:#9c5e0d;">New Custom Binder Request</h2>' +
-    '<table style="border-collapse:collapse;width:100%;" cellpadding="8">' +
-    detailRow('Name', f.name) +
-    detailRow('Phone', f.phone) +
-    detailRow('Email', f.email) +
-    detailRow('Shipping address', f.address) +
-    detailRow('Binder', f.binder_type) +
-    detailRow('Layout', f.binder_size) +
-    detailRow('Color', f.binder_color) +
-    detailRow('Price', f.binder_price) +
-    detailRow('Back image', f.has_back ? 'Yes (attached)' : 'No') +
-    detailRow('Notes', f.notes) +
-    '</table>' +
-    '<p style="color:#8a6a3a;">The customer&rsquo;s artwork is attached. ' +
-    'Reply goes straight to the customer.</p>' +
-    '</div>';
-
   await resendSend(env, {
     from,
     to: [shop],
     reply_to: f.email || undefined,
     subject: 'New Custom Binder Request — ' + (f.name || 'Unknown'),
-    html,
+    html: shopEmailHtml(f),
     attachments,
   });
 }
@@ -201,33 +279,12 @@ async function sendCustomerConfirmation(f, env) {
   const from = env.FROM_EMAIL || 'Krusty Kardboard <orders@krustykardboard.com>';
   if (!f.email) return;
 
-  const html =
-    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#2a1a00;">' +
-    '<h2 style="color:#9c5e0d;">We got your custom binder request!</h2>' +
-    '<p>Hi ' + esc(f.name || 'there') + ',</p>' +
-    '<p>Thanks for your request — we&rsquo;re reviewing it now and will reach out ' +
-    'soon at this email address to confirm the details.</p>' +
-    '<table style="border-collapse:collapse;background:#fff6e9;border:1px solid #f0d6a8;' +
-    'border-radius:8px;padding:8px;width:100%;" cellpadding="8">' +
-    detailRow('Binder', f.binder_type) +
-    detailRow('Layout', f.binder_size) +
-    detailRow('Color', f.binder_color) +
-    detailRow('Price', f.binder_price) +
-    detailRow('Back image', f.has_back ? 'Yes (extra charge)' : 'No') +
-    detailRow('Notes', f.notes) +
-    '</table>' +
-    '<p><strong>No payment is due yet.</strong> Once we confirm your order by ' +
-    'email, a 50% deposit gets your build started.</p>' +
-    '<p>&mdash; Krusty Kardboard TCG<br>' +
-    '<span style="color:#8a6a3a;font-size:12px;">Singles &bull; Slabs &bull; Sealed</span></p>' +
-    '</div>';
-
   await resendSend(env, {
     from,
     to: [f.email],
     reply_to: env.REPLY_TO || env.SHOP_EMAIL || 'krustykardboard@gmail.com',
     subject: 'We received your custom binder request — Krusty Kardboard',
-    html,
+    html: customerEmailHtml(f),
   });
 }
 
