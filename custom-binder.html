@@ -66,6 +66,11 @@
       filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
     }
 
+    /* Logo doubles as a home link. Block + full width so the logo's
+       percentage width still resolves against the container. */
+    .logo-link { display: block; width: 100%; text-align: center; }
+    .logo-link:hover .logo { filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)) brightness(1.06); }
+
     .heading {
       font-family: 'Bangers', cursive;
       font-size: 2.1rem;
@@ -640,7 +645,7 @@
 <body>
   <div class="container">
 
-    <img class="logo" src="logo.png" alt="Krusty Kardboard TCG" />
+    <a class="logo-link" href="index.html" aria-label="Back to Home"><img class="logo" src="logo.png" alt="Krusty Kardboard TCG" /></a>
     <h1 class="heading">Custom Binder Request</h1>
     <p class="subheading">Your art. Your colors. One-of-a-kind binder.</p>
     <div class="divider"></div>
