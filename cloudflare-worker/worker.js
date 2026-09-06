@@ -13,12 +13,20 @@
  * with other people's Workers, so that path can be blocked through no fault
  * of ours. It exists only so nothing breaks before Resend is configured.
  *
+ * Order log: if SHEET_WEBHOOK_URL is set, every submission is also appended as
+ * a row to a Google Sheet, via the Apps Script in ../google-apps-script. That
+ * is a durable record independent of email — it replaces the row the old
+ * Web3Forms → Sheets integration used to write. It is best-effort and runs
+ * after the response, so a Sheets outage can never fail an order.
+ *
  * Secrets (set in the dashboard under Settings → Variables and Secrets):
  *   RESEND_API_KEY        — from https://resend.com (preferred path)
+ *   SHEET_WEBHOOK_TOKEN   — shared secret the Apps Script checks (order log)
  *   IMGBB_API_KEY         — legacy fallback only
  *   WEB3FORMS_ACCESS_KEY  — legacy fallback only
  *
  * Optional vars:
+ *   SHEET_WEBHOOK_URL — Apps Script /exec URL; unset disables the order log
  *   FROM_EMAIL     — verified sender, default
  *                    "Krusty Kardboard <orders@krustykardboard.com>"
  *   SHOP_EMAIL     — where order emails go, default krustykardboard@gmail.com
@@ -71,7 +79,16 @@ export default {
         binder_price: form.get('binder_price') || '',
         notes: form.get('notes') || '',
         has_back: !!back,
+        // Prefixed so the attachments are self-labelling — otherwise two
+        // camera-roll names like IMG_1234.jpg are indistinguishable.
+        front_name: 'FRONT-' + (frontFile.name || 'image.jpg'),
+        back_name: back ? 'BACK-' + (back.name || 'image.jpg') : '',
       };
+
+      // Durable record, independent of whichever email path runs below. Kept
+      // best-effort on purpose: a row is worth having even if a send fails,
+      // and a Sheets problem must never cost us an order.
+      deferred(ctx, logToSheet(fields, env));
 
       // ---- Preferred path: Resend end-to-end ----
       if (env.RESEND_API_KEY) {
@@ -100,6 +117,8 @@ export default {
         back_image_url: backUrl || 'None provided',
       };
       delete payload.has_back;
+      delete payload.front_name;
+      delete payload.back_name;
 
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -261,12 +280,9 @@ async function sendShopEmail(f, frontFile, backFile, env) {
     throw new Error('Images are too large — please use images under 15MB each.');
   }
 
-  // Prefix the filenames so the attachments are self-labelling — otherwise
-  // two camera-roll names like IMG_1234.jpg are indistinguishable.
-  const frontName = 'FRONT-' + (frontFile.name || 'image.jpg');
-  const backName = backFile ? 'BACK-' + (backFile.name || 'image.jpg') : '';
-  f.front_name = frontName;
-  f.back_name = backName;
+  // Names are assigned by the handler so the order log and this email agree.
+  const frontName = f.front_name;
+  const backName = f.back_name;
 
   const attachments = [{
     filename: frontName,
@@ -298,6 +314,48 @@ async function sendCustomerConfirmation(f, env) {
     subject: 'We received your custom binder request — Krusty Kardboard',
     html: customerEmailHtml(f),
   });
+}
+
+/**
+ * Append the order to the Google Sheet through the Apps Script web app.
+ * The script matches these keys to its own header row, so renaming a column
+ * in the Sheet does not require redeploying the Worker.
+ */
+async function logToSheet(f, env) {
+  if (!env.SHEET_WEBHOOK_URL) return;
+
+  const res = await fetch(env.SHEET_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token: env.SHEET_WEBHOOK_TOKEN || '',
+      timestamp: new Date().toISOString(),
+      name: f.name,
+      phone: f.phone,
+      email: f.email,
+      address: f.address,
+      binder_brand: f.binder_brand,
+      binder_type: f.binder_type,
+      binder_size: f.binder_size,
+      binder_color: f.binder_color,
+      binder_price: f.binder_price,
+      // Artwork rides along on the order email rather than a public host, so
+      // the Sheet records the filenames to match a row against that email.
+      front_image: f.front_name,
+      back_image: f.has_back ? f.back_name : 'None provided',
+      notes: f.notes,
+    }),
+  });
+
+  // Apps Script serves the result via a 302 to script.googleusercontent.com;
+  // fetch follows it as a GET, which is fine — doPost has already run by then.
+  // It also answers 200 with an HTML error page for some failures, so trust
+  // the JSON body over the status code.
+  let body = {};
+  try { body = await res.json(); } catch (_) {}
+  if (!res.ok || body.success === false) {
+    throw new Error('Order log: ' + (body.message || ('failed (' + res.status + ')')));
+  }
 }
 
 async function fileToBase64(file) {

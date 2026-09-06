@@ -6,6 +6,12 @@ compatibility_date = "2024-09-01"
 [vars]
 ALLOWED_ORIGIN = "https://krustykardboard.com"
 
+# Apps Script web app that appends each order to the Google Sheet. Leave it
+# unset to turn the order log off. See README.md → "Order log — Google Sheet".
+# SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/.../exec"
+
 # Secrets are NOT stored here. Set them with:
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put SHEET_WEBHOOK_TOKEN
 #   wrangler secret put IMGBB_API_KEY
 #   wrangler secret put WEB3FORMS_ACCESS_KEY
