@@ -142,7 +142,12 @@ export default {
 
 /** Run a best-effort task after the response is sent, if the runtime allows. */
 function deferred(ctx, promise) {
-  const p = Promise.resolve(promise).catch(() => {});
+  const p = Promise.resolve(promise).catch((err) => {
+    // Best-effort work must never fail the request, but swallowing the error
+    // outright leaves nothing to debug. Send it to the Worker's logs
+    // (Cloudflare dashboard → Logs, or `wrangler tail`) instead.
+    console.error('Deferred task failed:', (err && err.message) || err);
+  });
   if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(p);
 }
 
