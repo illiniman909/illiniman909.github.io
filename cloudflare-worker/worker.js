@@ -19,10 +19,16 @@
  * Web3Forms → Sheets integration used to write. It is best-effort and runs
  * after the response, so a Sheets outage can never fail an order.
  *
+ * If IMGBB_API_KEY is also set, the log first uploads the artwork to ImgBB so
+ * the Sheet can show a thumbnail. That upload is on the log's path, never the
+ * order's: ImgBB rate-limits by shared IP, so it is expected to fail sometimes,
+ * and when it does the row is still written — just without the preview. The
+ * order email carries the images as attachments regardless.
+ *
  * Secrets (set in the dashboard under Settings → Variables and Secrets):
  *   RESEND_API_KEY        — from https://resend.com (preferred path)
  *   SHEET_WEBHOOK_TOKEN   — shared secret the Apps Script checks (order log)
- *   IMGBB_API_KEY         — legacy fallback only
+ *   IMGBB_API_KEY         — order-log thumbnails, and the legacy fallback
  *   WEB3FORMS_ACCESS_KEY  — legacy fallback only
  *
  * Optional vars:
@@ -88,7 +94,7 @@ export default {
       // Durable record, independent of whichever email path runs below. Kept
       // best-effort on purpose: a row is worth having even if a send fails,
       // and a Sheets problem must never cost us an order.
-      deferred(ctx, logToSheet(fields, env));
+      deferred(ctx, logOrder(fields, frontFile, back, env));
 
       // ---- Preferred path: Resend end-to-end ----
       if (env.RESEND_API_KEY) {
@@ -105,6 +111,9 @@ export default {
       }
 
       // ---- Legacy fallback: ImgBB + Web3Forms ----
+      // These uploads are separate from the order log's, which has already
+      // started. It costs two extra uploads on a path that only runs when
+      // Resend is down — worth it to keep the log independent of the email.
       const frontUrl = await uploadToImgbb(frontFile, env.IMGBB_API_KEY);
       const backUrl = back ? await uploadToImgbb(back, env.IMGBB_API_KEY) : '';
 
@@ -322,13 +331,42 @@ async function sendCustomerConfirmation(f, env) {
 }
 
 /**
+ * Host the artwork so the Sheet can show it, then append the row. Both halves
+ * are best-effort and neither can reach the customer's response.
+ */
+async function logOrder(f, frontFile, backFile, env) {
+  if (!env.SHEET_WEBHOOK_URL) return;
+
+  const [frontUrl, backUrl] = await Promise.all([
+    hostImage(frontFile, env),
+    backFile ? hostImage(backFile, env) : Promise.resolve(''),
+  ]);
+
+  await logToSheet(f, frontUrl, backUrl, env);
+}
+
+/**
+ * Upload one image for the Sheet preview. ImgBB rate-limits by IP and Workers
+ * share egress IPs with strangers, so this fails sometimes through no fault of
+ * ours — swallow it and return no URL, leaving the row's preview cell empty
+ * rather than losing the row.
+ */
+async function hostImage(file, env) {
+  if (!env.IMGBB_API_KEY) return '';
+  try {
+    return await uploadToImgbb(file, env.IMGBB_API_KEY);
+  } catch (err) {
+    console.error('Order log image upload failed:', (err && err.message) || err);
+    return '';
+  }
+}
+
+/**
  * Append the order to the Google Sheet through the Apps Script web app.
  * The script matches these keys to its own header row, so renaming a column
  * in the Sheet does not require redeploying the Worker.
  */
-async function logToSheet(f, env) {
-  if (!env.SHEET_WEBHOOK_URL) return;
-
+async function logToSheet(f, frontUrl, backUrl, env) {
   const res = await fetch(env.SHEET_WEBHOOK_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -348,6 +386,10 @@ async function logToSheet(f, env) {
       // the Sheet records the filenames to match a row against that email.
       front_image: f.front_name,
       back_image: f.has_back ? f.back_name : 'None provided',
+      // Empty when the upload was rate-limited; the script leaves the preview
+      // cell blank rather than writing a broken image.
+      front_url: frontUrl,
+      back_url: backUrl,
       notes: f.notes,
     }),
   });

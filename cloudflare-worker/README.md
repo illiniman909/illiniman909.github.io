@@ -104,7 +104,7 @@ Setup (~10 minutes, no billing, no API console):
 **Columns.** On an empty sheet the script writes its own header row:
 
 > Timestamp · Name · Phone · Email · Ship To · Binder Brand · Binder · Layout ·
-> Color · Price · Front Image · Back Image · Notes
+> Color · Price · Front Image · Back Image · Front Link · Back Link · Notes
 
 On a sheet that already has headers, it keeps yours and matches each incoming
 value to the column with that label (ignoring case, spaces and punctuation), so
@@ -114,9 +114,16 @@ so if your existing sheet says e.g. *Binder Price* where the script says
 *Price*, either rename the column or edit the label in the script's `FIELDS`
 list to match. Nothing needs redeploying on the Worker side.
 
-**Artwork.** The images ride along as attachments on the order email rather
-than being uploaded to a public host, so the Sheet records their filenames
-(`FRONT-…`, `BACK-…`) — that's what matches a row to its email.
+**Artwork.** The images always ride along as attachments on the order email.
+*Front Image* / *Back Image* record their filenames (`FRONT-…`, `BACK-…`),
+which is what matches a row to its email.
+
+If `IMGBB_API_KEY` is set, the log also uploads each image to ImgBB and puts
+the URL in *Front Link* / *Back Link*. That upload happens on the log's path,
+never the order's — ImgBB rate-limits by shared Cloudflare IP, so it is
+expected to fail now and then, and when it does the link cells are simply left
+blank. The row, the order email, and the attachments are unaffected. Leave
+`IMGBB_API_KEY` unset to skip the upload entirely.
 
 **Changing the script later:** edit it, then **Deploy → Manage deployments →**
 pencil icon **→ Version: New version → Deploy**. Editing alone does not update

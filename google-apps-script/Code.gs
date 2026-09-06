@@ -38,6 +38,10 @@ var FIELDS = [
   ['binder_price', 'Price'],
   ['front_image',  'Front Image'],
   ['back_image',   'Back Image'],
+  // Blank when the upload was rate-limited. Sheets makes a bare URL
+  // clickable on its own, so no formula is needed.
+  ['front_url',    'Front Link'],
+  ['back_url',     'Back Link'],
   ['notes',        'Notes'],
 ];
 
